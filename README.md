@@ -1,6 +1,8 @@
 # project-corebank-front
 
-[project-corebank](../project-corebank) 코어뱅킹 API를 쓰는 화면입니다. 로그인은 하나이고, 들어온 계정에 따라 화면이 나뉩니다.
+[![CI](https://github.com/Csj930205/project-corebank-front/actions/workflows/ci.yml/badge.svg)](https://github.com/Csj930205/project-corebank-front/actions/workflows/ci.yml)
+
+[project-corebank](https://github.com/Csj930205/project-corebank) 코어뱅킹 API를 쓰는 화면입니다. 로그인은 하나이고, 들어온 계정에 따라 화면이 나뉩니다.
 
 - **관리자**(창구 직원): 운영 콘솔. 아무 계좌나 열고 입출금·이체·해지를 처리하고, 전체 현황과 일 마감 결과를 확인합니다.
 - **고객**: 회원가입 뒤 내 계좌 목록, 본인 명의 계좌 개설, 내 계좌의 입출금·이체·해지.
