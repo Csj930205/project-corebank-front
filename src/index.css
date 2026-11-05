@@ -1506,3 +1506,35 @@ a:hover {
   border-radius: 10px;
   background: var(--accent-soft);
 }
+
+/* 감사 로그 검색: 넓으면 한 줄, 좁으면 두 칸씩 */
+.audit-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.audit-filters .input {
+  height: 44px;
+}
+
+.audit-filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.audit-filter-actions .btn {
+  height: 44px;
+  padding: 0 18px;
+}
+
+.audit-path {
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.audit-code {
+  font-size: 11px;
+  margin-top: 2px;
+}

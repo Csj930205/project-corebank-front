@@ -188,3 +188,58 @@ export interface ClosingPage {
   totalElements: number
   totalPages: number
 }
+
+// ───────────────────────── 감사 로그 (AuditLogController) ─────────────────────────
+
+/** AuditAction. 서버 enum 이름 그대로 */
+export type AuditAction =
+  | 'LOGIN'
+  | 'CUSTOMER_LOGIN'
+  | 'CUSTOMER_SIGNUP'
+  | 'ACCOUNT_OPEN'
+  | 'MY_ACCOUNTS'
+  | 'RECIPIENT_LOOKUP'
+  | 'ACCOUNT_VIEW'
+  | 'TRANSACTION_HISTORY'
+  | 'DEPOSIT'
+  | 'WITHDRAWAL'
+  | 'ACCOUNT_CLOSE'
+  | 'TRANSFER'
+  | 'ADMIN_ACCOUNT_SEARCH'
+  | 'ADMIN_SUMMARY'
+  | 'CLOSING_RUN'
+  | 'CLOSING_LIST'
+  | 'CLOSING_VIEW'
+  | 'AUDIT_LOG_SEARCH'
+
+/** SUCCESS: 2xx, DENIED: 401/403, FAILURE: 그 밖 */
+export type AuditOutcome = 'SUCCESS' | 'DENIED' | 'FAILURE'
+
+/** AuditLogEntry. 로그인·가입은 토큰이 없어 actorType 이 ANONYMOUS 이고 actorUsername 은 시도한 아이디다. */
+export interface AuditLogEntry {
+  id: number
+  occurredAt: string
+  requestId: string
+  actorType: 'ADMIN' | 'CUSTOMER' | 'ANONYMOUS'
+  actorUsername: string | null
+  customerId: number | null
+  action: AuditAction
+  httpMethod: string
+  path: string
+  statusCode: number
+  outcome: AuditOutcome
+  errorCode: string | null
+  targetAccountId: number | null
+  counterpartAccountId: number | null
+  clientIp: string
+  userAgent: string | null
+  durationMs: number
+}
+
+export interface AuditLogPage {
+  content: AuditLogEntry[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}

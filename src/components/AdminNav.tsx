@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router'
 
-/** 관리자 화면 안의 메뉴. 계좌(요약·목록)와 일 마감을 오간다. */
+/** 관리자 화면 안의 메뉴. 계좌(요약·목록), 일 마감, 감사 로그를 오간다. */
 export function AdminNav() {
   return (
     <nav className="subnav" aria-label="관리자 메뉴">
@@ -9,6 +9,7 @@ export function AdminNav() {
         계좌
       </NavLink>
       <NavLink to="/admin/closings">일 마감</NavLink>
+      <NavLink to="/admin/audit-logs">감사 로그</NavLink>
     </nav>
   )
 }

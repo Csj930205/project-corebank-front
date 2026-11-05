@@ -5,6 +5,7 @@ import { useSession } from './hooks/useSession'
 import { homeFor } from './lib/landing'
 import { AccountPage } from './pages/AccountPage'
 import { AdminPage } from './pages/AdminPage'
+import { AuditLogsPage } from './pages/AuditLogsPage'
 import { ClosingDetailPage } from './pages/ClosingDetailPage'
 import { ClosingsPage } from './pages/ClosingsPage'
 import { HomePage } from './pages/HomePage'
@@ -108,6 +109,14 @@ export default function App() {
             element={
               <RequireAdmin>
                 <ClosingDetailPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/audit-logs"
+            element={
+              <RequireAdmin>
+                <AuditLogsPage />
               </RequireAdmin>
             }
           />
