@@ -8,6 +8,7 @@ import type {
   AuditOutcome,
   ClosingDetail,
   ClosingPage,
+  LoginLock,
 } from './types'
 
 // 관리자 API. 모두 관리자 토큰(auth: true)을 보낸다. 로그인은 auth.ts.
@@ -62,4 +63,14 @@ export async function getAuditLogs(search: AuditSearch, size = 50, signal?: Abor
     if (value) params.set(key, value)
   }
   return (await request<AuditLogPage>('GET', `/admin/audit-logs?${params}`, { auth: true, signal })).data
+}
+
+/** 지금 잠긴 로그인 아이디(곧 풀리는 순서) */
+export async function getLoginLocks(signal?: AbortSignal) {
+  return (await request<{ content: LoginLock[] }>('GET', '/admin/login-locks', { auth: true, signal })).data.content
+}
+
+/** 로그인 잠금 해제. 잠기지 않은 아이디여도 성공(204)이다. 서버가 어떤 아이디가 있는지 알려 주지 않기 때문이다. */
+export async function unlockLogin(username: string) {
+  await request<void>('POST', `/admin/login-locks/${encodeURIComponent(username)}/unlock`, { auth: true })
 }

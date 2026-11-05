@@ -93,7 +93,8 @@ export async function request<T>(method: string, path: string, options: RequestO
     throw new ApiError(response.status, await readErrorBody(response))
   }
   return {
-    data: (await response.json()) as T,
+    // 204 No Content(잠금 해제 등)는 본문이 없다. json() 을 부르면 실패하므로 읽지 않는다.
+    data: (response.status === 204 ? undefined : await response.json()) as T,
     replayed: response.headers.get('Idempotent-Replayed') === 'true',
     location: response.headers.get('Location'),
   }

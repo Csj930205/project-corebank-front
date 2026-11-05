@@ -9,6 +9,7 @@ import { AuditLogsPage } from './pages/AuditLogsPage'
 import { ClosingDetailPage } from './pages/ClosingDetailPage'
 import { ClosingsPage } from './pages/ClosingsPage'
 import { HomePage } from './pages/HomePage'
+import { LoginLocksPage } from './pages/LoginLocksPage'
 import { LoginPage } from './pages/LoginPage'
 import { LogoutPage } from './pages/LogoutPage'
 import { MyAccountsPage } from './pages/MyAccountsPage'
@@ -117,6 +118,14 @@ export default function App() {
             element={
               <RequireAdmin>
                 <AuditLogsPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/login-locks"
+            element={
+              <RequireAdmin>
+                <LoginLocksPage />
               </RequireAdmin>
             }
           />

@@ -243,3 +243,14 @@ export interface AuditLogPage {
   totalElements: number
   totalPages: number
 }
+
+// ───────────────────────── 로그인 잠금 (AdminController) ─────────────────────────
+
+/** LoginThrottle.LockedLogin. 가입하지 않은 아이디도 잠기므로(계정 존재를 숨기려고) 목록에 나올 수 있다. */
+export interface LoginLock {
+  username: string
+  /** 잠기기까지의 연속 실패 수 */
+  failureCount: number
+  /** 이 시각에 저절로 풀린다(서버 시각, 시간대 없음) */
+  lockedUntil: string
+}
