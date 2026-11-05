@@ -20,6 +20,9 @@ const MESSAGES: Record<string, string> = {
   CLOSING_NOT_FOUND: '마감 기록을 찾을 수 없습니다.',
 }
 
+// 서버 문장을 그대로 보여 주는 코드. "15분 뒤에 다시 시도하세요" 처럼 언제 다시 할 수 있는지가 들어 있고 개발용 정보는 없다.
+const SERVER_WORDED = new Set(['LOGIN_LOCKED', 'RATE_LIMITED'])
+
 export function errorMessage(error: unknown): string {
   if (error instanceof NetworkError) {
     return '서버에 연결하지 못했습니다. 코어뱅킹 서버(8080)가 켜져 있는지 확인해 주세요.'
@@ -28,6 +31,7 @@ export function errorMessage(error: unknown): string {
     if (error.status >= 500) {
       return '서버 오류로 처리 결과를 확인하지 못했습니다.'
     }
+    if (SERVER_WORDED.has(error.code)) return error.message
     return MESSAGES[error.code] ?? error.message
   }
   return '알 수 없는 오류가 발생했습니다.'

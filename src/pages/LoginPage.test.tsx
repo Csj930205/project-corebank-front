@@ -136,4 +136,23 @@ describe('로그인', () => {
     expect(screen.getByLabelText('비밀번호')).toHaveValue('')
     expect(getSession()).toBeNull()
   })
+
+  it('실패가 쌓여 잠기면 서버가 알려 준 대기 시간을 그대로 보여 준다', async () => {
+    const message = '로그인 실패가 너무 많아 잠겼습니다. 15분 뒤에 다시 시도하세요.'
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ code: 'LOGIN_LOCKED', message }), {
+          status: 429,
+          headers: { 'Retry-After': '900' },
+        }),
+      ),
+    )
+    renderAt('/login')
+
+    await logIn('kim', 'whatever')
+
+    expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(getSession()).toBeNull()
+  })
 })
