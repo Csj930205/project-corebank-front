@@ -3,14 +3,15 @@ import { useSession } from '../hooks/useSession'
 import { navItemsFor } from '../lib/nav'
 
 /**
- * 상단 메뉴 줄. 로그인 상태에 따라 관리자·고객·로그인 전 메뉴가 다르다(lib/nav).
+ * 상단 바 안의 메뉴(로고 오른쪽). 로그인 상태에 따라 관리자·고객 메뉴가 다르고, 로그인 전에는 그리지 않는다(lib/nav).
  * NavLink 는 자기 주소만 강조하므로, 계좌 상세처럼 여러 주소가 한 메뉴에 속하는 경우를 위해 직접 고른다.
  */
 export function MainNav() {
   const session = useSession()
   const { pathname } = useLocation()
   const items = navItemsFor(session?.role ?? null)
-  const label = session?.role === 'ADMIN' ? '관리자 메뉴' : session ? '고객 메뉴' : '메뉴'
+  if (items.length === 0) return null
+  const label = session?.role === 'ADMIN' ? '관리자 메뉴' : '고객 메뉴'
 
   return (
     <nav className="mainnav" aria-label={label}>

@@ -24,16 +24,14 @@ const ADMIN: NavItem[] = [
 /** 고객 메뉴. 고객 화면은 내 계좌 목록과 계좌 상세(입금·출금·이체·해지가 그 안에 있다)뿐이다. */
 const CUSTOMER: NavItem[] = [{ to: '/my', label: '내 계좌', match: (p) => p === '/my' || isAccountPage(p) }]
 
-const GUEST: NavItem[] = [
-  { to: '/login', label: '로그인', match: (p) => p === '/login' },
-  { to: '/signup', label: '회원가입', match: (p) => p === '/signup' },
-]
-
-/** 로그인 상태(역할)에 따라 보여 줄 메뉴. 메뉴를 숨기는 것은 편의이고, 실제 보호는 RequireAuth 와 서버가 한다. */
+/**
+ * 로그인 상태(역할)에 따라 보여 줄 메뉴. 로그인 전에는 메뉴가 없고, 로그인·회원가입은 상단 바 오른쪽(App 의 UserMenu)에 있다.
+ * 메뉴를 숨기는 것은 편의이고, 실제 보호는 RequireAuth 와 서버가 한다.
+ */
 export function navItemsFor(role: Role | null): NavItem[] {
   if (role === 'ADMIN') return ADMIN
   if (role === 'CUSTOMER') return CUSTOMER
-  return GUEST
+  return []
 }
 
 /** 상단 로고를 눌렀을 때 가는 메인 화면. 관리자는 운영 콘솔 첫 화면, 고객은 내 계좌, 로그인 전이면 로그인 화면. */

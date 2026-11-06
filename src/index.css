@@ -960,23 +960,17 @@ a:hover {
   background: var(--surface);
 }
 
-/* ───────────────────────── 상단 메뉴 줄 ─────────────────────────
-   상단 바 바로 아래에 붙어 함께 고정된다. 폭이 좁으면 줄 안에서만 옆으로 밀어 보고, 화면 전체는 넘치지 않는다. */
+/* ───────────────────────── 상단 바 안 메뉴 ─────────────────────────
+   로고와 오른쪽 사용자 메뉴 사이를 채운다. 폭이 좁으면 메뉴 안에서만 옆으로 밀어 보고, 화면 전체는 넘치지 않는다. */
 .mainnav {
-  position: sticky;
-  top: 60px;
-  z-index: 9;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: saturate(180%) blur(12px);
-  border-bottom: 1px solid var(--line);
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0 20px;
 }
 
 .mainnav-inner {
   display: flex;
-  gap: 4px;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 6px 16px;
+  gap: 2px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1056,6 +1050,23 @@ a:hover {
 .link-button:hover {
   color: var(--ink);
   background: var(--surface-2);
+}
+
+/* 회원가입: 로그인 옆의 강조 버튼 */
+.nav-link.nav-cta {
+  color: #fff;
+  background: var(--accent);
+}
+
+.nav-link.nav-cta:hover,
+.nav-link.nav-cta.active {
+  color: #fff;
+  background: var(--accent-hover);
+}
+
+.brand,
+.topbar-right {
+  flex: none;
 }
 
 /* ───────────────────────── 관리자 로그인 ───────────────────────── */
@@ -1358,6 +1369,23 @@ a:hover {
   }
 
   .brand small {
+    display: none;
+  }
+
+  /* 휴대폰 폭: 로고는 표시만, 사용자 이름은 숨겨 메뉴에 자리를 더 준다 */
+  .brand-name {
+    display: none;
+  }
+
+  .mainnav {
+    margin: 0 8px;
+  }
+
+  .mainnav-link {
+    padding: 8px 10px;
+  }
+
+  .user-link {
     display: none;
   }
 }

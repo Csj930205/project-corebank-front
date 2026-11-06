@@ -48,15 +48,13 @@ describe('상단 메뉴 줄', () => {
     expect(screen.queryByRole('link', { name: '감사 로그' })).not.toBeInTheDocument()
   })
 
-  it('로그인 전에는 로그인·회원가입, 로그아웃하면 바로 바뀐다', () => {
+  it('로그인 전에는 메뉴가 없고(로그인·회원가입은 오른쪽 위), 로그아웃하면 바로 사라진다', () => {
     login('ADMIN')
     renderAt('/login')
     expect(screen.getByRole('link', { name: '전체 계좌' })).toBeInTheDocument()
 
     act(() => clearSession())
 
-    expect(screen.queryByRole('link', { name: '전체 계좌' })).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '로그인' })).toHaveAttribute('aria-current', 'page')
-    expect(screen.getByRole('link', { name: '회원가입' })).toHaveAttribute('href', '/signup')
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
   })
 })

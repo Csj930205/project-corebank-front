@@ -21,15 +21,27 @@ function UserMenu() {
   const session = useSession()
   const navigate = useNavigate()
 
-  // 로그인 전에는 로그인·회원가입이 아래 메뉴 줄에 있다
+  // 로그인 전: 오른쪽 위에 로그인·회원가입
   if (!session) {
-    return null
+    return (
+      <div className="admin-menu">
+        <NavLink to="/login" className="nav-link">
+          로그인
+        </NavLink>
+        <NavLink to="/signup" className="nav-link nav-cta">
+          회원가입
+        </NavLink>
+      </div>
+    )
   }
 
   return (
     <div className="admin-menu">
-      <NavLink to={homeFor(session.role)} className="nav-link">
-        {session.role === 'ADMIN' ? `관리자 · ${session.username}` : `${session.name ?? session.username}님`}
+      {/* 휴대폰 폭에서는 메뉴에 자리를 주려고 숨긴다(로그아웃은 남긴다) */}
+      <NavLink to={homeFor(session.role)} className="nav-link user-link">
+        <span className="user-name">
+          {session.role === 'ADMIN' ? `관리자 · ${session.username}` : `${session.name ?? session.username}님`}
+        </span>
       </NavLink>
       {/* 실제 로그아웃은 LogoutPage 가 한다. 이유는 그 파일 주석 참고 */}
       <button type="button" className="link-button" onClick={() => navigate('/logout')}>
@@ -48,14 +60,14 @@ export default function App() {
           <span className="brand-mark">
             <BrandMark />
           </span>
-          Corebank <small>{session?.role === 'CUSTOMER' ? '인터넷뱅킹' : '운영 콘솔'}</small>
+          <span className="brand-name">Corebank</span> <small>{session?.role === 'CUSTOMER' ? '인터넷뱅킹' : '운영 콘솔'}</small>
         </Link>
+        <MainNav />
         <div className="topbar-right">
           <span className="env">개발 서버 연결됨 · localhost:8080</span>
           <UserMenu />
         </div>
       </header>
-      <MainNav />
       <main className="content">
         <Routes>
           {/* 운영 콘솔 첫 화면은 관리자만. 고객은 내 계좌(/my)로, 로그인 전이면 로그인 화면으로 간다. */}
