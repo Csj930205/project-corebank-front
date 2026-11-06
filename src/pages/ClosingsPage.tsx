@@ -3,7 +3,6 @@ import { useId, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { getClosings, runClosing } from '../api/admin'
 import type { ClosingSummary } from '../api/types'
-import { AdminNav } from '../components/AdminNav'
 import { Notice } from '../components/Notice'
 import {
   CLOSING_STATUS_LABEL,
@@ -27,7 +26,6 @@ export function ClosingsPage() {
         <h1>관리자</h1>
         <p>영업일마다 계좌 잔액과 원장을 대사한 결과입니다. 매일 00:10 에 전날을 자동 마감합니다.</p>
       </div>
-      <AdminNav />
       <RunClosingCard />
       <ClosingTable page={page} onPage={(p) => setParams(p ? { page: String(p) } : {})} />
     </div>

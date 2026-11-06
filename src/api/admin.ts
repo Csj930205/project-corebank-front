@@ -13,9 +13,14 @@ import type {
 
 // 관리자 API. 모두 관리자 토큰(auth: true)을 보낸다. 로그인은 auth.ts.
 
+/** 계좌 검색 조건. 빈 값은 보내지 않는다. 개설일은 YYYY-MM-DD, 잔액은 원이고 모두 양 끝을 포함한다. */
 export interface AccountSearch {
   query?: string
   status?: AccountStatus
+  openedFrom?: string
+  openedTo?: string
+  minBalance?: number
+  maxBalance?: number
   page?: number
   size?: number
 }
@@ -24,6 +29,10 @@ export async function getAdminAccounts(search: AccountSearch, signal?: AbortSign
   const params = new URLSearchParams({ page: String(search.page ?? 0), size: String(search.size ?? 20) })
   if (search.query) params.set('query', search.query)
   if (search.status) params.set('status', search.status)
+  if (search.openedFrom) params.set('openedFrom', search.openedFrom)
+  if (search.openedTo) params.set('openedTo', search.openedTo)
+  if (search.minBalance !== undefined) params.set('minBalance', String(search.minBalance))
+  if (search.maxBalance !== undefined) params.set('maxBalance', String(search.maxBalance))
   return (await request<AdminAccountPage>('GET', `/admin/accounts?${params}`, { auth: true, signal })).data
 }
 

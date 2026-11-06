@@ -3,7 +3,6 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { getLoginLocks, unlockLogin } from '../api/admin'
 import type { LoginLock } from '../api/types'
-import { AdminNav } from '../components/AdminNav'
 import { Notice } from '../components/Notice'
 import { errorMessage } from '../lib/errors'
 import { formatDateTime } from '../lib/format'
@@ -38,7 +37,6 @@ export function LoginLocksPage() {
         <h1>관리자</h1>
         <p>로그인을 5번 연속 틀린 아이디는 15분 동안 잠깁니다. 본인 확인을 마쳤다면 여기서 바로 풀 수 있습니다.</p>
       </div>
-      <AdminNav />
       {done && (
         <Notice tone="success" title={`${done} 의 로그인 잠금을 풀었습니다.`}>
           실패 횟수도 지워져 처음부터 다시 셉니다.

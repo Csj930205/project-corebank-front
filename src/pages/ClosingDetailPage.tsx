@@ -3,7 +3,6 @@ import { useRef } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { getClosing, runClosing } from '../api/admin'
 import type { ClosingDetail, ClosingMismatch, ClosingTotal } from '../api/types'
-import { AdminNav } from '../components/AdminNav'
 import { Notice } from '../components/Notice'
 import {
   CLOSING_STATUS_LABEL,
@@ -41,7 +40,6 @@ function ClosingDetailView({ id }: { id: number }) {
           <Link to="/admin/closings">← 마감 기록</Link>
         </p>
       </div>
-      <AdminNav />
       {detail.isPending && <div className="skeleton skeleton-hero" aria-label="마감 결과를 불러오는 중" />}
       {detail.isError && <Notice tone="error" title={errorMessage(detail.error)} />}
       {detail.data && <ClosingResult detail={detail.data} />}

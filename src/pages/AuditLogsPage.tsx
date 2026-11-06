@@ -3,7 +3,6 @@ import { useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { getAuditLogs, type AuditSearch } from '../api/admin'
 import type { AuditAction, AuditOutcome } from '../api/types'
-import { AdminNav } from '../components/AdminNav'
 import { Notice } from '../components/Notice'
 import {
   AUDIT_ACTION_LABEL,
@@ -33,7 +32,6 @@ export function AuditLogsPage() {
         <h1>관리자</h1>
         <p>API 요청마다 남는 감사 기록입니다. 실패하거나 거부된 시도도 남고, 기록은 고치거나 지울 수 없습니다.</p>
       </div>
-      <AdminNav />
       {/* 주소가 바뀌면(뒤로 가기 등) 입력란도 주소 값으로 다시 채운다 */}
       <AuditFilters key={params.toString()} initial={search} onSearch={(s) => setParams(auditSearchToParams(s))} />
       <AuditTable search={search} onPage={(page) => setParams(auditSearchToParams({ ...search, page }))} />
@@ -53,7 +51,7 @@ function AuditFilters({ initial, onSearch }: { initial: AuditSearch; onSearch: (
 
   return (
     <section className="card">
-      <form className="audit-filters" onSubmit={submit} role="search" aria-label="감사 기록 검색">
+      <form className="filter-form" onSubmit={submit} role="search" aria-label="감사 기록 검색">
         <div className="field">
           <label htmlFor="audit-actor">아이디</label>
           <input id="audit-actor" className="input" value={form.actor ?? ''} onChange={set('actor')} maxLength={50} />
@@ -99,7 +97,7 @@ function AuditFilters({ initial, onSearch }: { initial: AuditSearch; onSearch: (
           <label htmlFor="audit-to">종료일</label>
           <input id="audit-to" className="input" type="date" value={form.to ?? ''} onChange={set('to')} />
         </div>
-        <div className="audit-filter-actions">
+        <div className="filter-actions">
           <button type="submit" className="btn">
             검색
           </button>

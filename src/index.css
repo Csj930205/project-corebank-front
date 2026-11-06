@@ -960,6 +960,57 @@ a:hover {
   background: var(--surface);
 }
 
+/* ───────────────────────── 상단 메뉴 줄 ─────────────────────────
+   상단 바 바로 아래에 붙어 함께 고정된다. 폭이 좁으면 줄 안에서만 옆으로 밀어 보고, 화면 전체는 넘치지 않는다. */
+.mainnav {
+  position: sticky;
+  top: 60px;
+  z-index: 9;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.mainnav-inner {
+  display: flex;
+  gap: 4px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 6px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.mainnav-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.mainnav-link {
+  flex: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sub);
+  padding: 8px 14px;
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.mainnav-link:hover {
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.mainnav-link.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.mainnav-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 /* ───────────────────────── 상단 바 메뉴 ───────────────────────── */
 .topbar-right {
   display: flex;
@@ -1312,33 +1363,6 @@ a:hover {
 }
 
 /* ───────────────────────── 일 마감 ───────────────────────── */
-.subnav {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  width: fit-content;
-  border-radius: 12px;
-  background: var(--surface-2);
-}
-
-.subnav a {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--sub);
-  padding: 8px 16px;
-  border-radius: 9px;
-}
-
-.subnav a:hover {
-  text-decoration: none;
-  color: var(--ink);
-}
-
-.subnav a.active {
-  color: var(--ink);
-  background: var(--surface);
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
-}
 
 .run-closing {
   display: flex;
@@ -1507,26 +1531,48 @@ a:hover {
   background: var(--accent-soft);
 }
 
-/* 감사 로그 검색: 넓으면 한 줄, 좁으면 두 칸씩 */
-.audit-filters {
+/* 검색 조건 폼(감사 로그, 계좌 목록): 넓으면 한 줄, 좁으면 두 칸씩 */
+.filter-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
   align-items: end;
 }
 
-.audit-filters .input {
+.filter-form .input {
   height: 44px;
 }
 
-.audit-filter-actions {
+.filter-actions {
   display: flex;
   gap: 8px;
 }
 
-.audit-filter-actions .btn {
+.filter-actions .btn {
   height: 44px;
   padding: 0 18px;
+}
+
+/* 계좌 검색: 검색어 칸은 두 칸 너비. 폼 아래에 상태 버튼 줄이 온다 */
+.account-filters {
+  margin-bottom: 16px;
+}
+
+.account-query {
+  grid-column: span 2;
+}
+
+.filter-problem {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 14px;
+  color: var(--out);
+}
+
+@media (max-width: 480px) {
+  .account-query {
+    grid-column: 1 / -1;
+  }
 }
 
 .audit-path {

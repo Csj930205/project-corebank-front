@@ -1,8 +1,10 @@
 import { Link, Navigate, NavLink, Route, Routes, useNavigate } from 'react-router'
 import { BrandMark } from './components/icons'
+import { MainNav } from './components/MainNav'
 import { RequireAdmin, RequireAuth, RequireCustomer } from './components/RequireAuth'
 import { useSession } from './hooks/useSession'
 import { homeFor } from './lib/landing'
+import { mainPathFor } from './lib/nav'
 import { AccountPage } from './pages/AccountPage'
 import { AdminPage } from './pages/AdminPage'
 import { AuditLogsPage } from './pages/AuditLogsPage'
@@ -19,12 +21,9 @@ function UserMenu() {
   const session = useSession()
   const navigate = useNavigate()
 
+  // 로그인 전에는 로그인·회원가입이 아래 메뉴 줄에 있다
   if (!session) {
-    return (
-      <NavLink to="/login" className="nav-link">
-        로그인
-      </NavLink>
-    )
+    return null
   }
 
   return (
@@ -45,7 +44,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <Link to="/" className="brand">
+        <Link to={mainPathFor(session?.role ?? null)} className="brand">
           <span className="brand-mark">
             <BrandMark />
           </span>
@@ -56,6 +55,7 @@ export default function App() {
           <UserMenu />
         </div>
       </header>
+      <MainNav />
       <main className="content">
         <Routes>
           {/* 운영 콘솔 첫 화면은 관리자만. 고객은 내 계좌(/my)로, 로그인 전이면 로그인 화면으로 간다. */}
