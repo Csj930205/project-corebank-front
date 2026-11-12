@@ -1618,3 +1618,29 @@ a:hover {
   display: inline-flex;
   gap: 6px;
 }
+
+/* 거래 정정: 사유 입력칸, 승인·반려 영역 */
+.textarea {
+  height: auto;
+  min-height: 84px;
+  padding: 12px 14px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.correction-decision {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.correction-decision .closure-warning {
+  margin: 0;
+  color: var(--ink);
+}
+
+/* 거래내역의 정정 요청 링크(관리자만) */
+.tx-correct {
+  font-size: 12px;
+  font-weight: 600;
+}

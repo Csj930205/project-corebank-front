@@ -7,9 +7,11 @@ import { homeFor } from './lib/landing'
 import { mainPathFor } from './lib/nav'
 import { AccountPage } from './pages/AccountPage'
 import { AdminPage } from './pages/AdminPage'
+import { AdminUsersPage } from './pages/AdminUsersPage'
 import { AuditLogsPage } from './pages/AuditLogsPage'
 import { ClosingDetailPage } from './pages/ClosingDetailPage'
 import { ClosingsPage } from './pages/ClosingsPage'
+import { CorrectionsPage } from './pages/CorrectionsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginLocksPage } from './pages/LoginLocksPage'
 import { LoginPage } from './pages/LoginPage'
@@ -130,6 +132,22 @@ export default function App() {
             element={
               <RequireAdmin>
                 <AuditLogsPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/corrections"
+            element={
+              <RequireAdmin>
+                <CorrectionsPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/admins"
+            element={
+              <RequireAdmin>
+                <AdminUsersPage />
               </RequireAdmin>
             }
           />

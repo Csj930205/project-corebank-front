@@ -23,6 +23,8 @@ export const TRANSACTION_TYPE_LABEL: Record<TransactionType, string> = {
   TRANSFER_OUT: '이체 출금',
   TRANSFER_IN: '이체 입금',
   CLOSURE_PAYOUT: '해지 지급',
+  REVERSAL_OUT: '정정(차감)',
+  REVERSAL_IN: '정정(환입)',
 }
 
 /** 일계표 표시 순서. 서버는 이름순으로 주므로 업무 순서로 다시 정렬한다. */
@@ -32,6 +34,8 @@ export const TRANSACTION_TYPE_ORDER: TransactionType[] = [
   'TRANSFER_OUT',
   'TRANSFER_IN',
   'CLOSURE_PAYOUT',
+  'REVERSAL_OUT',
+  'REVERSAL_IN',
 ]
 
 /** 상태 표시용 CSS 클래스 */

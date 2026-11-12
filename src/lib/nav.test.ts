@@ -9,7 +9,15 @@ const activeAt = (role: Parameters<typeof navItemsFor>[0], path: string) =>
 
 describe('상단 메뉴', () => {
   it('역할마다 메뉴가 다르다', () => {
-    expect(labels('ADMIN')).toEqual(['계좌 조회·개설', '전체 계좌', '일 마감', '감사 로그', '로그인 잠금'])
+    expect(labels('ADMIN')).toEqual([
+      '계좌 조회·개설',
+      '전체 계좌',
+      '일 마감',
+      '거래 정정',
+      '감사 로그',
+      '로그인 잠금',
+      '관리자 계정',
+    ])
     expect(labels('CUSTOMER')).toEqual(['내 계좌'])
     expect(labels(null)).toEqual([])
   })
@@ -19,6 +27,7 @@ describe('상단 메뉴', () => {
     expect(activeAt('ADMIN', '/accounts/7')).toEqual(['계좌 조회·개설'])
     expect(activeAt('ADMIN', '/admin')).toEqual(['전체 계좌'])
     expect(activeAt('ADMIN', '/admin/closings/3')).toEqual(['일 마감'])
+    expect(activeAt('ADMIN', '/admin/corrections')).toEqual(['거래 정정'])
     expect(activeAt('CUSTOMER', '/accounts/7')).toEqual(['내 계좌'])
   })
 

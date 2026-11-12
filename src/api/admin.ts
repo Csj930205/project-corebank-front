@@ -2,12 +2,16 @@ import { request } from './client'
 import type {
   AccountStatus,
   AdminAccountPage,
+  AdminUser,
   AdminSummary,
   AuditAction,
   AuditLogPage,
   AuditOutcome,
   ClosingDetail,
   ClosingPage,
+  Correction,
+  CorrectionPage,
+  CorrectionStatus,
   LoginLock,
 } from './types'
 
@@ -82,4 +86,39 @@ export async function getLoginLocks(signal?: AbortSignal) {
 /** 로그인 잠금 해제. 잠기지 않은 아이디여도 성공(204)이다. 서버가 어떤 아이디가 있는지 알려 주지 않기 때문이다. */
 export async function unlockLogin(username: string) {
   await request<void>('POST', `/admin/login-locks/${encodeURIComponent(username)}/unlock`, { auth: true })
+}
+
+// ───────── 거래 정정 ─────────
+// 결정한 사람은 서버가 토큰으로 정한다. 그래서 본문에 요청자·승인자를 보내지 않는다.
+
+export async function getCorrections(status: CorrectionStatus | undefined, page: number, size = 20, signal?: AbortSignal) {
+  const params = new URLSearchParams({ page: String(page), size: String(size) })
+  if (status) params.set('status', status)
+  return (await request<CorrectionPage>('GET', `/admin/corrections?${params}`, { auth: true, signal })).data
+}
+
+/** 정정 요청. 원장은 아직 바뀌지 않고, 다른 관리자가 승인해야 역분개가 들어간다. */
+export async function requestCorrection(transactionId: number, reason: string) {
+  return (await request<Correction>('POST', '/admin/corrections', { body: { transactionId, reason }, auth: true })).data
+}
+
+/** 승인. 멱등성 키가 없다: 다시 보내면 이미 승인돼 409 로 끝나고 역분개가 두 번 들어가지 않는다. */
+export async function approveCorrection(id: number, comment?: string) {
+  const body = comment ? { comment } : undefined
+  return (await request<Correction>('POST', `/admin/corrections/${id}/approval`, { body, auth: true })).data
+}
+
+export async function rejectCorrection(id: number, comment: string) {
+  return (await request<Correction>('POST', `/admin/corrections/${id}/rejection`, { body: { comment }, auth: true }))
+    .data
+}
+
+// ───────── 관리자 계정 ─────────
+
+export async function getAdminUsers(signal?: AbortSignal) {
+  return (await request<{ content: AdminUser[] }>('GET', '/admin/admins', { auth: true, signal })).data.content
+}
+
+export async function createAdminUser(username: string, password: string) {
+  return (await request<AdminUser>('POST', '/admin/admins', { body: { username, password }, auth: true })).data
 }

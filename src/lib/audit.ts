@@ -22,6 +22,15 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   CLOSING_RUN: '일 마감 실행',
   CLOSING_LIST: '마감 기록 목록',
   CLOSING_VIEW: '마감 상세',
+  LOGIN_LOCK_LIST: '로그인 잠금 목록',
+  LOGIN_UNLOCK: '로그인 잠금 해제',
+  CORRECTION_REQUEST: '정정 요청',
+  CORRECTION_LIST: '정정 요청 목록',
+  CORRECTION_VIEW: '정정 요청 상세',
+  CORRECTION_APPROVE: '정정 승인',
+  CORRECTION_REJECT: '정정 반려',
+  ADMIN_USER_LIST: '관리자 목록',
+  ADMIN_USER_CREATE: '관리자 등록',
   AUDIT_LOG_SEARCH: '감사 기록 조회',
 }
 

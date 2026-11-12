@@ -17,8 +17,10 @@ const ADMIN: NavItem[] = [
   { to: '/', label: '계좌 조회·개설', match: (p) => p === '/' || isAccountPage(p) },
   { to: '/admin', label: '전체 계좌', match: (p) => p === '/admin' },
   { to: '/admin/closings', label: '일 마감', match: (p) => p.startsWith('/admin/closings') },
+  { to: '/admin/corrections', label: '거래 정정', match: (p) => p.startsWith('/admin/corrections') },
   { to: '/admin/audit-logs', label: '감사 로그', match: (p) => p.startsWith('/admin/audit-logs') },
   { to: '/admin/login-locks', label: '로그인 잠금', match: (p) => p.startsWith('/admin/login-locks') },
+  { to: '/admin/admins', label: '관리자 계정', match: (p) => p.startsWith('/admin/admins') },
 ]
 
 /** 고객 메뉴. 고객 화면은 내 계좌 목록과 계좌 상세(입금·출금·이체·해지가 그 안에 있다)뿐이다. */

@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import { getHistory } from '../api/corebank'
+import { useSession } from '../hooks/useSession'
+import { isCorrectable } from '../lib/corrections'
 import type { HistoryItem } from '../api/types'
 import { errorMessage } from '../lib/errors'
 import { formatDateTime, formatWon } from '../lib/format'
@@ -22,6 +24,9 @@ function title(item: HistoryItem): string {
       return `${item.counterparty?.ownerName ?? '알 수 없음'}님이 보냄`
     case 'CLOSURE_PAYOUT':
       return '해지 잔액 지급'
+    case 'REVERSAL_OUT':
+    case 'REVERSAL_IN':
+      return `거래 정정 · #${item.reversalOfId} 취소`
   }
 }
 
@@ -71,6 +76,8 @@ function groupByDay(items: HistoryItem[]) {
  * 첫 페이지는 before 없이, "더보기"는 직전 응답의 nextBefore 를 before 로 보낸다. nextBefore 가 null 이면 끝이다.
  */
 export function HistoryList({ accountId }: { accountId: number }) {
+  // 관리자에게만 거래 번호와 정정 요청 링크를 보여 준다. 고객은 정정을 요청할 수 없다(서버도 /admin/** 로 막는다).
+  const isAdmin = useSession()?.role === 'ADMIN'
   const history = useInfiniteQuery({
     queryKey: ['history', accountId],
     queryFn: ({ pageParam, signal }) => getHistory(accountId, pageParam, PAGE_SIZE, signal),
@@ -118,6 +125,19 @@ export function HistoryList({ accountId }: { accountId: number }) {
                       <>
                         {' · '}
                         <Link to={`/accounts/${item.counterparty.accountId}`}>{item.counterparty.accountNumber}</Link>
+                      </>
+                    )}
+                    {isAdmin && (
+                      <>
+                        {' · '}#{item.transactionId}
+                        {isCorrectable(item.type) && (
+                          <>
+                            {' · '}
+                            <Link className="tx-correct" to={`/admin/corrections?transactionId=${item.transactionId}`}>
+                              정정 요청
+                            </Link>
+                          </>
+                        )}
                       </>
                     )}
                   </div>

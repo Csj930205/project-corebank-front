@@ -50,7 +50,15 @@ export interface TransferResult {
   createdAt: string
 }
 
-export type TransactionType = 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER_OUT' | 'TRANSFER_IN' | 'CLOSURE_PAYOUT'
+/** REVERSAL_OUT·REVERSAL_IN 은 관리자 정정(역분개)으로 생긴 거래다. 잔액이 줄면 OUT, 늘면 IN */
+export type TransactionType =
+  | 'DEPOSIT'
+  | 'WITHDRAWAL'
+  | 'TRANSFER_OUT'
+  | 'TRANSFER_IN'
+  | 'CLOSURE_PAYOUT'
+  | 'REVERSAL_OUT'
+  | 'REVERSAL_IN'
 
 /** TransactionHistoryResponse.Item */
 export interface HistoryItem {
@@ -61,6 +69,8 @@ export interface HistoryItem {
   balanceAfter: number
   transferId: number | null
   counterparty: { accountId: number; accountNumber: string; ownerName: string } | null
+  /** 역분개일 때 되돌린 원래 거래 id. 그 밖에는 null */
+  reversalOfId: number | null
   createdAt: string
 }
 
@@ -210,6 +220,15 @@ export type AuditAction =
   | 'CLOSING_RUN'
   | 'CLOSING_LIST'
   | 'CLOSING_VIEW'
+  | 'LOGIN_LOCK_LIST'
+  | 'LOGIN_UNLOCK'
+  | 'CORRECTION_REQUEST'
+  | 'CORRECTION_LIST'
+  | 'CORRECTION_VIEW'
+  | 'CORRECTION_APPROVE'
+  | 'CORRECTION_REJECT'
+  | 'ADMIN_USER_LIST'
+  | 'ADMIN_USER_CREATE'
   | 'AUDIT_LOG_SEARCH'
 
 /** SUCCESS: 2xx, DENIED: 401/403, FAILURE: 그 밖 */
@@ -253,4 +272,46 @@ export interface LoginLock {
   failureCount: number
   /** 이 시각에 저절로 풀린다(서버 시각, 시간대 없음) */
   lockedUntil: string
+}
+
+// ───────────────────────── 거래 정정 (CorrectionController) ─────────────────────────
+
+export type CorrectionStatus = 'REQUESTED' | 'APPROVED' | 'REJECTED'
+
+/** CorrectionView. 이체는 출금 쪽 거래가 대상이고 받은 계좌는 counterpartAccountNumber 다. */
+export interface Correction {
+  id: number
+  status: CorrectionStatus
+  reason: string
+  requestedBy: string
+  requestedAt: string
+  decidedBy: string | null
+  decidedAt: string | null
+  decisionComment: string | null
+  transactionId: number
+  transactionType: TransactionType
+  amount: number
+  transactionAt: string
+  transferId: number | null
+  accountId: number
+  accountNumber: string | null
+  ownerName: string | null
+  counterpartAccountNumber: string | null
+  /** 승인으로 생긴 역분개 거래 id. 이체는 2개 */
+  reversalTransactionIds: number[]
+}
+
+export interface CorrectionPage {
+  content: Correction[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+/** AdminController.AdminUserResponse */
+export interface AdminUser {
+  id: number
+  username: string
+  createdAt: string
 }

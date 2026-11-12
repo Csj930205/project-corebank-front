@@ -18,6 +18,13 @@ const MESSAGES: Record<string, string> = {
   BUSINESS_DATE_NOT_ENDED: '오늘과 미래 날짜는 아직 끝나지 않아 마감할 수 없습니다.',
   CLOSING_ALREADY_RUNNING: '같은 날짜의 마감이 이미 실행 중입니다. 잠시 뒤 목록을 새로 고쳐 주세요.',
   CLOSING_NOT_FOUND: '마감 기록을 찾을 수 없습니다.',
+  TRANSACTION_NOT_FOUND: '해당 거래를 찾을 수 없습니다. 거래 번호를 확인해 주세요.',
+  NOT_CORRECTABLE: '정정할 수 없는 거래입니다. 해지 지급과 정정 거래는 되돌릴 수 없습니다.',
+  ALREADY_REVERSED: '이미 정정된 거래입니다.',
+  CORRECTION_ALREADY_REQUESTED: '이 거래에 승인을 기다리는 정정 요청이 이미 있습니다.',
+  CORRECTION_ALREADY_DECIDED: '다른 관리자가 이미 승인 또는 반려했습니다. 목록을 새로 고쳐 주세요.',
+  CORRECTION_NOT_FOUND: '정정 요청을 찾을 수 없습니다.',
+  SELF_APPROVAL_NOT_ALLOWED: '본인이 요청한 정정은 다른 관리자가 승인하거나 반려해야 합니다.',
 }
 
 // 서버 문장을 그대로 보여 주는 코드. "15분 뒤에 다시 시도하세요" 처럼 언제 다시 할 수 있는지가 들어 있고 개발용 정보는 없다.
