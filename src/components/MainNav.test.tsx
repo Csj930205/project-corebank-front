@@ -11,6 +11,7 @@ const login = (role: Role) =>
     expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
     role,
     name: role === 'ADMIN' ? null : '김고객',
+    adminRole: role === 'ADMIN' ? 'OPERATOR' : null,
   })
 
 const renderAt = (path: string) =>

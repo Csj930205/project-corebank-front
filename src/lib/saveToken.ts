@@ -9,5 +9,6 @@ export function saveToken(token: TokenResponse): void {
     expiresAt: token.expiresAt,
     role: token.role,
     name: token.name,
+    adminRole: token.adminRole ?? null,
   })
 }

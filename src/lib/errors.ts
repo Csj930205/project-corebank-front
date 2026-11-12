@@ -14,7 +14,7 @@ const MESSAGES: Record<string, string> = {
   USERNAME_TAKEN: '이미 사용 중인 아이디입니다.',
   INVALID_CREDENTIALS: '아이디 또는 비밀번호가 올바르지 않습니다.',
   UNAUTHORIZED: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
-  FORBIDDEN: '이 화면을 볼 권한이 없습니다.',
+  FORBIDDEN: '권한이 없습니다. 이 일은 다른 역할의 관리자가 합니다.',
   BUSINESS_DATE_NOT_ENDED: '오늘과 미래 날짜는 아직 끝나지 않아 마감할 수 없습니다.',
   CLOSING_ALREADY_RUNNING: '같은 날짜의 마감이 이미 실행 중입니다. 잠시 뒤 목록을 새로 고쳐 주세요.',
   CLOSING_NOT_FOUND: '마감 기록을 찾을 수 없습니다.',
@@ -29,7 +29,9 @@ const MESSAGES: Record<string, string> = {
   PRODUCT_NAME_TAKEN: '같은 이름의 상품이 이미 있습니다.',
   MONTH_NOT_ENDED: '이번 달과 미래 달은 아직 끝나지 않아 결산할 수 없습니다.',
   ACCRUAL_ALREADY_RUNNING: '같은 날의 이자 적립이 동시에 실행됐습니다. 잠시 뒤 다시 실행해 주세요.',
-  SELF_APPROVAL_NOT_ALLOWED: '본인이 요청한 정정은 다른 관리자가 승인하거나 반려해야 합니다.',
+  SELF_APPROVAL_NOT_ALLOWED: '본인이 요청한 일은 다른 관리자가 승인하거나 반려해야 합니다.',
+  ADMIN_ALREADY_DECIDED: '다른 책임자가 이미 승인 또는 반려했습니다. 목록을 새로 고쳐 주세요.',
+  ADMIN_NOT_FOUND: '관리자 등록 요청을 찾을 수 없습니다.',
 }
 
 // 서버 문장을 그대로 보여 주는 코드. "15분 뒤에 다시 시도하세요" 처럼 언제 다시 할 수 있는지가 들어 있고 개발용 정보는 없다.

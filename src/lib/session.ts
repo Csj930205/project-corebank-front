@@ -4,7 +4,11 @@
 // 같은 페이지의 스크립트는 읽을 수 있으므로 XSS 에는 똑같이 취약하다. 그래서 서버는 토큰 수명을 30분으로 짧게 둔다.
 // 저장소가 막힌 환경(개인정보 보호 모드 등)에서는 메모리에만 두고, 새로 고침하면 다시 로그인한다.
 
+import type { AdminRole } from '../api/types'
+
 export type Role = 'ADMIN' | 'CUSTOMER'
+
+const ADMIN_ROLES: readonly string[] = ['TELLER', 'APPROVER', 'OPERATOR'] satisfies AdminRole[]
 
 export interface Session {
   accessToken: string
@@ -14,6 +18,8 @@ export interface Session {
   role: Role
   /** 고객 이름. 관리자는 null */
   name: string | null
+  /** 관리자 역할. 고객은 null */
+  adminRole: AdminRole | null
 }
 
 // 이름을 바꿔, role 이 없던 예전(관리자 전용) 저장값은 읽지 않고 다시 로그인하게 한다.
@@ -26,9 +32,10 @@ function read(): Session | null {
     const raw = sessionStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as Session
-    return parsed.accessToken && parsed.expiresAt && (parsed.role === 'ADMIN' || parsed.role === 'CUSTOMER')
-      ? parsed
-      : null
+    // 역할 기능 전에 저장된 관리자 세션(adminRole 없음)은 버리고 다시 로그인하게 한다. 그 토큰은 서버에서도 조회만 된다.
+    const valid =
+      parsed.role === 'CUSTOMER' || (parsed.role === 'ADMIN' && ADMIN_ROLES.includes(parsed.adminRole ?? ''))
+    return parsed.accessToken && parsed.expiresAt && valid ? parsed : null
   } catch {
     return null
   }

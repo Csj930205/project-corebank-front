@@ -15,6 +15,8 @@ import { yesterday } from '../lib/closing'
 import { errorMessage } from '../lib/errors'
 import { formatDateTime, formatWon } from '../lib/format'
 import { TRIGGER_LABEL, formatRate, lastMonth, parseRate } from '../lib/interest'
+import { useSession } from '../hooks/useSession'
+import { can, roleOnlyHint } from '../lib/roles'
 
 const PRODUCTS_KEY = ['admin', 'products']
 const PAYMENTS_KEY = ['admin', 'interest-payments']
@@ -23,6 +25,7 @@ const PAYMENTS_KEY = ['admin', 'interest-payments']
  * 예금 상품과 이자 운영. 상품 등록·판매 중지, 이자 적립·결산 수동 실행(평소에는 매일·매달 자동), 최근 이자 지급.
  */
 export function ProductsPage() {
+  const canOperate = can(useSession(), 'OPERATE')
   return (
     <div className="stack">
       <div className="welcome">
@@ -32,17 +35,18 @@ export function ProductsPage() {
           미만은 버리고, 이자소득세 14%와 지방소득세 1.4%를 뗍니다.
         </p>
       </div>
-      <div className="grid-2">
-        <ProductList />
-        <CreateProduct />
+      {!canOperate && <Notice tone="info" title={`상품 등록·판매 중지와 이자 실행은 ${roleOnlyHint('OPERATE')}`} />}
+      <div className={canOperate ? 'grid-2' : 'stack'}>
+        <ProductList canOperate={canOperate} />
+        {canOperate && <CreateProduct />}
       </div>
-      <InterestRun />
+      {canOperate && <InterestRun />}
       <PaymentList />
     </div>
   )
 }
 
-function ProductList() {
+function ProductList({ canOperate }: { canOperate: boolean }) {
   const queryClient = useQueryClient()
   const products = useQuery({ queryKey: PRODUCTS_KEY, queryFn: ({ signal }) => getAdminProducts(signal) })
   // 판매 중지는 되돌릴 수 없어 두 번 눌러야 한다(로그인 잠금 해제와 같은 방식).
@@ -86,7 +90,7 @@ function ProductList() {
                   <td className="num">
                     {p.status === 'DISCONTINUED' ? (
                       <span className="status status-closed">판매 중지</span>
-                    ) : p.id === 1 ? (
+                    ) : p.id === 1 || !canOperate ? (
                       <span className="status status-active">판매 중</span>
                     ) : confirming === p.id ? (
                       <span className="lock-actions">

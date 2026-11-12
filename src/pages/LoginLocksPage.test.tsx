@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { clearSession } from '../lib/session'
+import { loginAdmin } from '../test/loginAdmin'
 import type { LoginLock } from '../api/types'
 import { LoginLocksPage } from './LoginLocksPage'
 
@@ -39,6 +41,10 @@ function renderPage() {
 }
 
 describe('로그인 잠금 화면', () => {
+  // 실행·변경 버튼은 운영 역할에게만 보인다.
+  beforeEach(() => loginAdmin('OPERATOR'))
+  afterEach(() => clearSession())
+
   it('잠긴 아이디와 실패 수, 로그인 기록 링크를 보여 준다', async () => {
     vi.stubGlobal('fetch', fakeServer([KIM]))
     renderPage()

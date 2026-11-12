@@ -14,6 +14,7 @@ import {
   statusFromParam,
 } from '../lib/corrections'
 import { errorMessage } from '../lib/errors'
+import { can, roleOnlyHint } from '../lib/roles'
 import { formatDateTime, formatWon } from '../lib/format'
 
 const PAGE_SIZE = 20
@@ -28,10 +29,12 @@ const TABS: { value: CorrectionStatus | undefined; param: string; label: string 
 
 /**
  * 거래 정정. 잘못 들어간 거래는 원장을 고치지 않고 반대 거래(역분개)로 되돌린다.
- * 한 관리자가 요청하고 다른 관리자가 승인해야 돈이 움직인다(4-eyes). 거래내역의 "정정 요청" 을 누르면
+ * 창구(TELLER)가 요청하고 책임자(APPROVER)가 승인해야 돈이 움직인다(4-eyes). 역할이 하나뿐이라 요청자와 승인자는
+ * 늘 다른 계정이다. 요청 칸은 창구에게만, 승인·반려 버튼은 책임자에게만 보인다. 거래내역의 "정정 요청" 을 누르면
  * ?transactionId= 가 붙어 이 화면의 요청 칸이 채워진다.
  */
 export function CorrectionsPage() {
+  const session = useSession()
   const [params, setParams] = useSearchParams()
   const status = statusFromParam(params.get('status'))
   const page = Math.max(0, Number(params.get('page') ?? 0) || 0)
@@ -49,9 +52,9 @@ export function CorrectionsPage() {
     <div className="stack">
       <div className="welcome">
         <h1>관리자</h1>
-        <p>잘못 처리된 거래를 반대 거래(역분개)로 되돌립니다. 요청한 사람이 아닌 다른 관리자가 승인해야 반영됩니다.</p>
+        <p>잘못 처리된 거래를 반대 거래(역분개)로 되돌립니다. 창구가 요청하고 책임자가 승인해야 반영됩니다.</p>
       </div>
-      <RequestCard initialTransactionId={params.get('transactionId') ?? ''} />
+      {can(session, 'REQUEST_CORRECTION') && <RequestCard initialTransactionId={params.get('transactionId') ?? ''} />}
       <section className="card">
         <div className="segmented" role="tablist" aria-label="요청 상태">
           {TABS.map((t) => (
@@ -283,7 +286,10 @@ function Decision({ correction }: { correction: Correction }) {
   })
 
   if (!canDecide(correction, session?.username)) {
-    return <p className="hint left">본인이 올린 요청입니다. 다른 관리자가 승인하거나 반려합니다.</p>
+    return <p className="hint left">본인이 올린 요청입니다. 책임자가 승인하거나 반려합니다.</p>
+  }
+  if (!can(session, 'APPROVE')) {
+    return <p className="hint left">승인·반려는 {roleOnlyHint('APPROVE')}</p>
   }
 
   return (

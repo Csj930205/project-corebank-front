@@ -2,6 +2,7 @@ import { request } from './client'
 import type {
   AccountStatus,
   AdminAccountPage,
+  AdminRole,
   AdminUser,
   AccrualResult,
   DepositProduct,
@@ -123,8 +124,19 @@ export async function getAdminUsers(signal?: AbortSignal) {
   return (await request<{ content: AdminUser[] }>('GET', '/admin/admins', { auth: true, signal })).data.content
 }
 
-export async function createAdminUser(username: string, password: string) {
-  return (await request<AdminUser>('POST', '/admin/admins', { body: { username, password }, auth: true })).data
+/** 관리자 등록 요청(운영자). 책임자가 승인해야 로그인할 수 있다. */
+export async function requestAdminUser(username: string, password: string, role: AdminRole) {
+  return (await request<AdminUser>('POST', '/admin/admins', { body: { username, password, role }, auth: true })).data
+}
+
+/** 관리자 등록 승인(책임자) */
+export async function approveAdminUser(id: number) {
+  return (await request<AdminUser>('POST', `/admin/admins/${id}/approval`, { auth: true })).data
+}
+
+/** 관리자 등록 반려(책임자) */
+export async function rejectAdminUser(id: number) {
+  return (await request<AdminUser>('POST', `/admin/admins/${id}/rejection`, { auth: true })).data
 }
 
 // ───────── 예금 상품·이자 ─────────

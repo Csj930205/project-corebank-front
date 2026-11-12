@@ -7,6 +7,8 @@ import { Notice } from '../components/Notice'
 import { errorMessage } from '../lib/errors'
 import { formatDateTime } from '../lib/format'
 import { lockRemaining } from '../lib/loginLocks'
+import { useSession } from '../hooks/useSession'
+import { can, roleOnlyHint } from '../lib/roles'
 
 const LOCKS_KEY = ['admin', 'login-locks']
 
@@ -15,6 +17,7 @@ const LOCKS_KEY = ['admin', 'login-locks']
  * 푼 것(LOGIN_UNLOCK)과 이 목록을 본 것(LOGIN_LOCK_LIST)은 서버 감사 로그에 남는다.
  */
 export function LoginLocksPage() {
+  const canUnlock = can(useSession(), 'OPERATE')
   const queryClient = useQueryClient()
   const [done, setDone] = useState<string | null>(null)
 
@@ -43,13 +46,15 @@ export function LoginLocksPage() {
         </Notice>
       )}
       {unlock.isError && <Notice tone="error" title={errorMessage(unlock.error)} />}
-      <LockTable onUnlock={run} pending={unlock.isPending ? unlock.variables : undefined} />
-      <UnlockByName onUnlock={run} pending={unlock.isPending} />
+      {!canUnlock && <Notice tone="info" title={`잠금 해제는 ${roleOnlyHint('OPERATE')}`} />}
+      <LockTable onUnlock={canUnlock ? run : undefined} pending={unlock.isPending ? unlock.variables : undefined} />
+      {canUnlock && <UnlockByName onUnlock={run} pending={unlock.isPending} />}
     </div>
   )
 }
 
-function LockTable({ onUnlock, pending }: { onUnlock: (username: string) => void; pending?: string }) {
+/** onUnlock 이 없으면(운영 역할이 아니면) 해제 버튼 없이 목록만 보여 준다. */
+function LockTable({ onUnlock, pending }: { onUnlock?: (username: string) => void; pending?: string }) {
   const locks = useQuery({
     queryKey: LOCKS_KEY,
     queryFn: ({ signal }) => getLoginLocks(signal),
@@ -104,7 +109,7 @@ function LockTable({ onUnlock, pending }: { onUnlock: (username: string) => void
                     </Link>
                   </td>
                   <td className="num">
-                    {confirming === lock.username ? (
+                    {!onUnlock ? null : confirming === lock.username ? (
                       <span className="lock-actions">
                         <button
                           type="button"

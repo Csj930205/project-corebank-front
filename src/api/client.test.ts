@@ -13,7 +13,7 @@ describe('request (로그인 토큰)', () => {
   const future = () => new Date(Date.now() + 60_000).toISOString()
 
   it('로그인 상태면 관리자 API 뿐 아니라 계좌 API 에도 토큰을 붙이고, auth: false(로그인 요청)면 붙이지 않는다', async () => {
-    saveSession({ accessToken: 'tok-123', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null })
+    saveSession({ accessToken: 'tok-123', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null, adminRole: 'TELLER' })
     const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(200, {})))
     vi.stubGlobal('fetch', fetchMock)
 
@@ -38,7 +38,7 @@ describe('request (로그인 토큰)', () => {
   })
 
   it('계좌 API 가 401 이어도(토큰 만료) 로그인 상태를 지운다', async () => {
-    saveSession({ accessToken: 'expired', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null })
+    saveSession({ accessToken: 'expired', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null, adminRole: 'TELLER' })
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(401, { code: 'UNAUTHORIZED', message: 'x' })))
 
     await request('GET', '/accounts/1').catch(() => undefined)
@@ -47,7 +47,7 @@ describe('request (로그인 토큰)', () => {
   })
 
   it('관리자 API 가 401 이면 로그인 상태를 지운다', async () => {
-    saveSession({ accessToken: 'expired', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null })
+    saveSession({ accessToken: 'expired', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null, adminRole: 'TELLER' })
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(401, { code: 'UNAUTHORIZED', message: 'x' })))
 
     await request('GET', '/admin/summary', { auth: true }).catch(() => undefined)
@@ -56,7 +56,7 @@ describe('request (로그인 토큰)', () => {
   })
 
   it('로그인 실패(401, auth: false)는 다른 세션을 건드리지 않는다', async () => {
-    saveSession({ accessToken: 'keep', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null })
+    saveSession({ accessToken: 'keep', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null, adminRole: 'TELLER' })
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(401, { code: 'INVALID_CREDENTIALS', message: 'x' })))
 
     await request('POST', '/auth/login', { body: {}, auth: false }).catch(() => undefined)

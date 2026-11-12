@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Correction } from '../api/types'
+import type { AdminRole, Correction } from '../api/types'
 import { clearSession, saveSession } from '../lib/session'
 import { CorrectionsPage } from './CorrectionsPage'
 
@@ -65,8 +65,16 @@ function renderPage(path = '/admin/corrections') {
   )
 }
 
-function loginAs(username: string) {
-  saveSession({ accessToken: 't', username, expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(), role: 'ADMIN', name: null })
+/** maker 는 창구(요청), checker 는 책임자(승인) */
+function loginAs(username: string, adminRole: AdminRole = username === 'checker' ? 'APPROVER' : 'TELLER') {
+  saveSession({
+    accessToken: 't',
+    username,
+    expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+    role: 'ADMIN',
+    name: null,
+    adminRole,
+  })
 }
 
 describe('거래 정정 화면', () => {
@@ -109,6 +117,21 @@ describe('거래 정정 화면', () => {
     expect(confirm).toBeDisabled()
     await userEvent.type(screen.getByLabelText('반려 사유'), '정상 입금 확인')
     expect(confirm).toBeEnabled()
+  })
+
+  it('요청 칸은 창구에게만, 승인 버튼은 책임자에게만 보인다', async () => {
+    loginAs('other-teller', 'TELLER')
+    vi.stubGlobal('fetch', fakeServer([REQUESTED]))
+    const { unmount } = renderPage()
+    expect(await screen.findByText(/승인·반려는 책임자 역할만 할 수 있습니다/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '승인' })).not.toBeInTheDocument()
+    expect(screen.getByLabelText('거래 번호')).toBeInTheDocument()
+    unmount()
+
+    loginAs('checker')
+    renderPage()
+    expect(await screen.findByRole('button', { name: '승인' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('거래 번호')).not.toBeInTheDocument()
   })
 
   it('거래내역에서 오면 거래 번호가 채워져 있고, 사유를 적어 요청한다', async () => {

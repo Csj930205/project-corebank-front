@@ -38,7 +38,9 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   INTEREST_SETTLE: '이자 결산',
   INTEREST_PAYMENT_LIST: '이자 지급 목록',
   ADMIN_USER_LIST: '관리자 목록',
-  ADMIN_USER_CREATE: '관리자 등록',
+  ADMIN_USER_CREATE: '관리자 등록 요청',
+  ADMIN_USER_APPROVE: '관리자 등록 승인',
+  ADMIN_USER_REJECT: '관리자 등록 반려',
   AUDIT_LOG_SEARCH: '감사 기록 조회',
 }
 

@@ -19,6 +19,7 @@ import { LogoutPage } from './pages/LogoutPage'
 import { MyAccountsPage } from './pages/MyAccountsPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { SignUpPage } from './pages/SignUpPage'
+import { ADMIN_ROLE_LABEL } from './lib/roles'
 
 function UserMenu() {
   const session = useSession()
@@ -43,7 +44,9 @@ function UserMenu() {
       {/* 휴대폰 폭에서는 메뉴에 자리를 주려고 숨긴다(로그아웃은 남긴다) */}
       <NavLink to={homeFor(session.role)} className="nav-link user-link">
         <span className="user-name">
-          {session.role === 'ADMIN' ? `관리자 · ${session.username}` : `${session.name ?? session.username}님`}
+          {session.role === 'ADMIN'
+            ? `${session.adminRole ? ADMIN_ROLE_LABEL[session.adminRole] : '관리자'} · ${session.username}`
+            : `${session.name ?? session.username}님`}
         </span>
       </NavLink>
       {/* 실제 로그아웃은 LogoutPage 가 한다. 이유는 그 파일 주석 참고 */}

@@ -12,11 +12,14 @@ import {
 } from '../lib/closing'
 import { errorMessage } from '../lib/errors'
 import { formatDateTime, formatWonString } from '../lib/format'
+import { useSession } from '../hooks/useSession'
+import { can, roleOnlyHint } from '../lib/roles'
 
 const PAGE_SIZE = 20
 
 /** 일 마감 첫 화면: 마감 실행 + 실행 기록 목록. 쪽 번호는 주소(?page=)에 담는다. */
 export function ClosingsPage() {
+  const session = useSession()
   const [params, setParams] = useSearchParams()
   const page = Math.max(0, Number(params.get('page') ?? 0) || 0)
 
@@ -26,7 +29,11 @@ export function ClosingsPage() {
         <h1>관리자</h1>
         <p>영업일마다 계좌 잔액과 원장을 대사한 결과입니다. 매일 00:10 에 전날을 자동 마감합니다.</p>
       </div>
-      <RunClosingCard />
+      {can(session, 'OPERATE') ? (
+        <RunClosingCard />
+      ) : (
+        <Notice tone="info" title={`수동 마감은 ${roleOnlyHint('OPERATE')}`} />
+      )}
       <ClosingTable page={page} onPage={(p) => setParams(p ? { page: String(p) } : {})} />
     </div>
   )

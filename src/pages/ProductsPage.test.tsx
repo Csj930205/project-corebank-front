@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { clearSession } from '../lib/session'
+import { loginAdmin } from '../test/loginAdmin'
 import type { DepositProduct } from '../api/types'
 import { ProductsPage } from './ProductsPage'
 
@@ -49,6 +51,10 @@ function renderPage() {
 }
 
 describe('상품·이자 화면', () => {
+  // 실행·변경 버튼은 운영 역할에게만 보인다.
+  beforeEach(() => loginAdmin('OPERATOR'))
+  afterEach(() => clearSession())
+
   it('상품과 금리를 보여 주고, 기본 상품에는 판매 중지 버튼이 없다', async () => {
     vi.stubGlobal('fetch', fakeServer())
     renderPage()
@@ -56,6 +62,17 @@ describe('상품·이자 화면', () => {
     expect(await screen.findByText('연 3.65%')).toBeInTheDocument()
     expect(screen.getByText('연 0.10%')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '기본 입출금 통장 판매 중지' })).not.toBeInTheDocument()
+  })
+
+  it('운영 역할이 아니면 목록만 보이고 등록·판매 중지·이자 실행은 없다', async () => {
+    loginAdmin('TELLER')
+    vi.stubGlobal('fetch', fakeServer())
+    renderPage()
+
+    expect(await screen.findByText('연 3.65%')).toBeInTheDocument()
+    expect(screen.getByText(/운영 역할만 할 수 있습니다/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '자유적립 예금 판매 중지' })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('상품 이름')).not.toBeInTheDocument()
   })
 
   it('판매 중지는 두 번 눌러야 요청한다', async () => {

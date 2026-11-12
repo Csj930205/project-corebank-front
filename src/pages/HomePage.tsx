@@ -8,9 +8,12 @@ import { ProductSelect } from '../components/ProductSelect'
 import { errorMessage } from '../lib/errors'
 import { parseAccountId } from '../lib/format'
 import { loadRecentAccounts, rememberAccount } from '../lib/recentAccounts'
+import { useSession } from '../hooks/useSession'
+import { can, roleOnlyHint } from '../lib/roles'
 
 export function HomePage() {
   const navigate = useNavigate()
+  const canOpen = can(useSession(), 'MOVE_MONEY')
   const nameId = useId()
   const lookupInputId = useId()
   const [ownerName, setOwnerName] = useState('')
@@ -59,26 +62,29 @@ export function HomePage() {
             <h2>계좌 개설</h2>
             <p>잔액 0원으로 시작합니다</p>
           </div>
-          <form onSubmit={submitOpen} className="form">
-            <div className="field">
-              <label htmlFor={nameId}>예금주 이름</label>
-              <input
-                id={nameId}
-                className="input"
-                value={ownerName}
-                onChange={(e) => setOwnerName(e.target.value)}
-                maxLength={100}
-                placeholder="홍길동"
-                autoComplete="off"
-                required
-              />
-            </div>
-            <ProductSelect value={productId} onChange={setProductId} />
-            <button type="submit" className="btn block" disabled={open.isPending || !ownerName.trim()}>
-              {open.isPending && <span className="spinner" aria-hidden />}
-              {open.isPending ? '개설 중' : '계좌 개설'}
-            </button>
-          </form>
+          {!canOpen && <Notice tone="info" title={`계좌 개설은 ${roleOnlyHint('MOVE_MONEY')}`} />}
+          {canOpen && (
+            <form onSubmit={submitOpen} className="form">
+              <div className="field">
+                <label htmlFor={nameId}>예금주 이름</label>
+                <input
+                  id={nameId}
+                  className="input"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  maxLength={100}
+                  placeholder="홍길동"
+                  autoComplete="off"
+                  required
+                />
+              </div>
+              <ProductSelect value={productId} onChange={setProductId} />
+              <button type="submit" className="btn block" disabled={open.isPending || !ownerName.trim()}>
+                {open.isPending && <span className="spinner" aria-hidden />}
+                {open.isPending ? '개설 중' : '계좌 개설'}
+              </button>
+            </form>
+          )}
           {open.isError && <Notice tone="error" title={errorMessage(open.error)} />}
         </section>
 

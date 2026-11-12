@@ -46,6 +46,7 @@ function tokenResponse(role: 'ADMIN' | 'CUSTOMER') {
       username: role === 'ADMIN' ? 'admin' : 'kim',
       role,
       name: role === 'ADMIN' ? null : '김고객',
+      adminRole: role === 'ADMIN' ? 'TELLER' : null,
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } },
   )
@@ -115,6 +116,7 @@ describe('로그인', () => {
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
       role: 'CUSTOMER',
       name: '김고객',
+      adminRole: null,
     })
     renderAt('/admin')
     expect(screen.getByText('내 계좌 화면')).toBeInTheDocument()

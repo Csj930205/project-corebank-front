@@ -102,6 +102,9 @@ export interface MyAccounts {
   accounts: Account[]
 }
 
+/** 관리자 역할(AdminRole). 창구는 돈을 움직이고, 책임자는 승인하고, 운영은 마감·이자·상품·관리자 등록 요청을 한다. */
+export type AdminRole = 'TELLER' | 'APPROVER' | 'OPERATOR'
+
 /** AuthController.TokenResponse */
 export interface TokenResponse {
   accessToken: string
@@ -112,6 +115,8 @@ export interface TokenResponse {
   role: 'ADMIN' | 'CUSTOMER'
   /** 고객 이름. 관리자는 null */
   name: string | null
+  /** 관리자 역할. 고객은 null */
+  adminRole: AdminRole | null
 }
 
 /** AdminController.AccountPage (쪽 번호 방식, page 는 0부터) */
@@ -240,6 +245,8 @@ export type AuditAction =
   | 'INTEREST_PAYMENT_LIST'
   | 'ADMIN_USER_LIST'
   | 'ADMIN_USER_CREATE'
+  | 'ADMIN_USER_APPROVE'
+  | 'ADMIN_USER_REJECT'
   | 'AUDIT_LOG_SEARCH'
 
 /** SUCCESS: 2xx, DENIED: 401/403, FAILURE: 그 밖 */
@@ -320,10 +327,19 @@ export interface CorrectionPage {
   totalPages: number
 }
 
+export type AdminUserStatus = 'PENDING' | 'ACTIVE' | 'REJECTED'
+
 /** AdminController.AdminUserResponse */
 export interface AdminUser {
   id: number
   username: string
+  role: AdminRole
+  /** PENDING 이면 책임자 승인 전이라 로그인할 수 없다 */
+  status: AdminUserStatus
+  /** 등록을 요청한 운영자. 서버 설정(.env)으로 만든 계정은 null */
+  requestedBy: string | null
+  decidedBy: string | null
+  decidedAt: string | null
   createdAt: string
 }
 

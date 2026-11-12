@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { clearSession } from '../lib/session'
+import { loginAdmin } from '../test/loginAdmin'
 import type { ClosingDetail, ClosingSummary } from '../api/types'
 import { yesterday } from '../lib/closing'
 import { ClosingDetailPage } from './ClosingDetailPage'
@@ -69,6 +71,10 @@ function renderAt(path: string) {
 }
 
 describe('일 마감 화면', () => {
+  // 실행·변경 버튼은 운영 역할에게만 보인다.
+  beforeEach(() => loginAdmin('OPERATOR'))
+  afterEach(() => clearSession())
+
   it('마감 기록을 보여 주고, 큰 금액도 정확히 표시한다', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({ content: [BALANCED], page: 0, size: 20, totalElements: 1, totalPages: 1 })))
     renderAt('/admin/closings')

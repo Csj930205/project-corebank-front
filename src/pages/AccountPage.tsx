@@ -16,6 +16,7 @@ import { useSession } from '../hooks/useSession'
 import { errorMessage } from '../lib/errors'
 import { formatAccountNumber, formatDateTime, formatWon, parseAccountId } from '../lib/format'
 import { rememberAccount } from '../lib/recentAccounts'
+import { can, roleOnlyHint } from '../lib/roles'
 
 type Tab = 'deposit' | 'withdraw' | 'transfer' | 'demo' | 'close'
 
@@ -89,6 +90,8 @@ function AccountView({ id }: { id: number }) {
   const location = useLocation()
   const session = useSession()
   const isAdmin = session?.role === 'ADMIN'
+  // 창구가 아닌 관리자(책임자·운영)는 계좌를 보기만 한다. 돈을 움직이는 일은 창구가 한다.
+  const canMove = can(session, 'MOVE_MONEY')
   const tabs = TABS.filter((item) => isAdmin || !item.adminOnly)
   const justOpened = (location.state as { opened?: boolean } | null)?.opened === true
   const [tab, setTab] = useState<Tab>('deposit')
@@ -132,28 +135,37 @@ function AccountView({ id }: { id: number }) {
           <HistoryList accountId={id} />
         </section>
 
-        <section className="card sticky-panel">
-          <div className="segmented" role="tablist" aria-label="거래 종류">
-            {tabs.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={tab === item.id}
-                onClick={() => setTab(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-          {/* 해지 탭은 해지 일시와 함께 자체 안내를 보여 준다 */}
-          {data.status === 'CLOSED' && tab !== 'close' && <Notice tone="info" title="해지된 계좌는 거래할 수 없습니다." />}
-          {tab === 'deposit' && <MoneyForm accountId={id} kind="deposit" />}
-          {tab === 'withdraw' && <MoneyForm accountId={id} kind="withdraw" />}
-          {tab === 'transfer' && <TransferForm fromAccountId={id} fromAccountNumber={data.accountNumber} />}
-          {tab === 'demo' && isAdmin && <IdempotencyDemo accountId={id} />}
-          {tab === 'close' && <ClosureForm account={data} />}
-        </section>
+        {!canMove && (
+          <section className="card sticky-panel">
+            <Notice tone="info" title="조회만 할 수 있습니다.">
+              입금·출금·이체·해지는 {roleOnlyHint('MOVE_MONEY')}
+            </Notice>
+          </section>
+        )}
+        {canMove && (
+          <section className="card sticky-panel">
+            <div className="segmented" role="tablist" aria-label="거래 종류">
+              {tabs.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === item.id}
+                  onClick={() => setTab(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            {/* 해지 탭은 해지 일시와 함께 자체 안내를 보여 준다 */}
+            {data.status === 'CLOSED' && tab !== 'close' && <Notice tone="info" title="해지된 계좌는 거래할 수 없습니다." />}
+            {tab === 'deposit' && <MoneyForm accountId={id} kind="deposit" />}
+            {tab === 'withdraw' && <MoneyForm accountId={id} kind="withdraw" />}
+            {tab === 'transfer' && <TransferForm fromAccountId={id} fromAccountNumber={data.accountNumber} />}
+            {tab === 'demo' && isAdmin && <IdempotencyDemo accountId={id} />}
+            {tab === 'close' && <ClosureForm account={data} />}
+          </section>
+        )}
       </div>
       <InterestCard account={data} />
     </div>
