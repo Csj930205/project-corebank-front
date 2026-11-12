@@ -271,12 +271,17 @@ function InterestRun() {
       {accrue.isError && <Notice tone="error" title={errorMessage(accrue.error)} />}
       {settle.isSuccess && (
         <Notice
-          tone={settle.data.failed > 0 ? 'error' : 'success'}
-          title={`${settle.data.month} 결산: ${settle.data.paid}개 계좌에 세후 ${formatWon(settle.data.totalNet)} 지급`}
+          tone={settle.data.failed > 0 || settle.data.status !== 'COMPLETED' ? 'error' : 'success'}
+          title={
+            settle.data.status === 'COMPLETED'
+              ? `${settle.data.month} 결산: ${settle.data.paid}개 계좌에 세후 ${formatWon(settle.data.totalNet)} 지급`
+              : `${settle.data.month} 결산이 중간에 멈췄습니다(${settle.data.status}). 다시 결산하면 남은 계좌만 지급합니다.`
+          }
         >
           세전 {formatWon(settle.data.totalGross)} · 세금 {formatWon(settle.data.totalTax)} · 해지 계좌 건너뜀{' '}
           {settle.data.skipped}개
           {settle.data.failed > 0 && ` · 실패 ${settle.data.failed}개(서버 로그 확인, 다시 결산하면 실패한 계좌만 다시 시도)`}
+          {` · 배치 실행 #${settle.data.jobExecutionId}`}
         </Notice>
       )}
       {settle.isError && <Notice tone="error" title={errorMessage(settle.error)} />}

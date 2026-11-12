@@ -395,9 +395,15 @@ export interface AccrualResult {
   accrued: number
 }
 
-/** InterestService.SettlementResult */
+export type BatchStatus = 'COMPLETED' | 'FAILED' | 'STOPPED' | 'STARTED' | 'STARTING' | 'STOPPING' | 'ABANDONED' | 'UNKNOWN'
+
+/** InterestService.SettlementResult. 결산은 Spring Batch 잡(interestSettlementJob)으로 돈다. */
 export interface SettlementResult {
   month: string
+  /** 배치 실행 번호(BATCH_JOB_EXECUTION) */
+  jobExecutionId: number
+  /** COMPLETED 면 끝까지 돌았다(실패 계좌가 있어도). 그 밖에는 중간에 멈췄다 */
+  status: BatchStatus
   paid: number
   skipped: number
   failed: number
