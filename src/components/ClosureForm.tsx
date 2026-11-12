@@ -12,6 +12,8 @@ import { Notice } from './Notice'
 function refreshAfterClosure(queryClient: QueryClient, accountId: number) {
   void queryClient.invalidateQueries({ queryKey: ['account', accountId] })
   void queryClient.invalidateQueries({ queryKey: ['history', accountId] })
+  // 해지하면 쌓인 이자를 먼저 지급하므로 이자 현황도 바뀐다.
+  void queryClient.invalidateQueries({ queryKey: ['interest', accountId] })
   void queryClient.invalidateQueries({ queryKey: ['admin'] })
 }
 

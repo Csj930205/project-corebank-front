@@ -17,6 +17,7 @@ import { LoginLocksPage } from './pages/LoginLocksPage'
 import { LoginPage } from './pages/LoginPage'
 import { LogoutPage } from './pages/LogoutPage'
 import { MyAccountsPage } from './pages/MyAccountsPage'
+import { ProductsPage } from './pages/ProductsPage'
 import { SignUpPage } from './pages/SignUpPage'
 
 function UserMenu() {
@@ -132,6 +133,14 @@ export default function App() {
             element={
               <RequireAdmin>
                 <AuditLogsPage />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <RequireAdmin>
+                <ProductsPage />
               </RequireAdmin>
             }
           />

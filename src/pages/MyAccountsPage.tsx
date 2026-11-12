@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { getMyAccounts, openAccount } from '../api/corebank'
 import { Chevron } from '../components/icons'
 import { Notice } from '../components/Notice'
+import { ProductSelect } from '../components/ProductSelect'
 import { useSession } from '../hooks/useSession'
 import { errorMessage } from '../lib/errors'
 import { formatWon } from '../lib/format'
@@ -14,12 +16,13 @@ export function MyAccountsPage() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const welcome = (location.state as { welcome?: boolean } | null)?.welcome === true
+  const [productId, setProductId] = useState<number | undefined>(undefined)
 
   const accounts = useQuery({ queryKey: ['my-accounts'], queryFn: ({ signal }) => getMyAccounts(signal) })
 
   // 고객은 이름 없이 보내면 서버가 본인 명의로 연다. 돈이 움직이지 않아 멱등성 키 없이, 연타만 막는다.
   const open = useMutation({
-    mutationFn: () => openAccount(),
+    mutationFn: () => openAccount(undefined, productId),
     onSuccess: ({ data }) => {
       void queryClient.invalidateQueries({ queryKey: ['my-accounts'] })
       navigate(`/accounts/${data.id}`, { state: { opened: true } })
@@ -74,6 +77,9 @@ export function MyAccountsPage() {
           <div className="card-title">
             <h2>계좌 개설</h2>
             <p>내 이름으로, 잔액 0원으로 시작합니다</p>
+          </div>
+          <div className="form">
+            <ProductSelect value={productId} onChange={setProductId} />
           </div>
           <button type="button" className="btn block" disabled={open.isPending} onClick={() => open.mutate()}>
             {open.isPending && <span className="spinner" aria-hidden />}

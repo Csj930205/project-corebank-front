@@ -17,6 +17,7 @@ const ADMIN: NavItem[] = [
   { to: '/', label: '계좌 조회·개설', match: (p) => p === '/' || isAccountPage(p) },
   { to: '/admin', label: '전체 계좌', match: (p) => p === '/admin' },
   { to: '/admin/closings', label: '일 마감', match: (p) => p.startsWith('/admin/closings') },
+  { to: '/admin/products', label: '상품·이자', match: (p) => p.startsWith('/admin/products') },
   { to: '/admin/corrections', label: '거래 정정', match: (p) => p.startsWith('/admin/corrections') },
   { to: '/admin/audit-logs', label: '감사 로그', match: (p) => p.startsWith('/admin/audit-logs') },
   { to: '/admin/login-locks', label: '로그인 잠금', match: (p) => p.startsWith('/admin/login-locks') },

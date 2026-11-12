@@ -127,7 +127,7 @@ describe('일 마감 화면', () => {
     expect(await screen.findByText('불일치 2건을 찾았습니다.')).toBeInTheDocument()
     // 일계표: 거래가 없는 종류도 0건으로 보인다.
     expect(screen.getByRole('cell', { name: '30,000원' })).toBeInTheDocument()
-    expect(screen.getAllByRole('cell', { name: '0건' })).toHaveLength(6)
+    expect(screen.getAllByRole('cell', { name: '0건' })).toHaveLength(7)
     // 불일치: 금액은 원, 반쪽 이체는 건수
     expect(screen.getByRole('link', { name: '계좌 7' })).toHaveAttribute('href', '/accounts/7')
     expect(screen.getByText('10,001원')).toBeInTheDocument()

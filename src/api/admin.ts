@@ -3,6 +3,10 @@ import type {
   AccountStatus,
   AdminAccountPage,
   AdminUser,
+  AccrualResult,
+  DepositProduct,
+  InterestPaymentPage,
+  SettlementResult,
   AdminSummary,
   AuditAction,
   AuditLogPage,
@@ -121,4 +125,35 @@ export async function getAdminUsers(signal?: AbortSignal) {
 
 export async function createAdminUser(username: string, password: string) {
   return (await request<AdminUser>('POST', '/admin/admins', { body: { username, password }, auth: true })).data
+}
+
+// ───────── 예금 상품·이자 ─────────
+
+/** 판매 중지 포함 전체 상품 */
+export async function getAdminProducts(signal?: AbortSignal) {
+  return (await request<{ content: DepositProduct[] }>('GET', '/admin/products', { auth: true, signal })).data.content
+}
+
+/** 상품 등록. annualRate 는 연이율(%), 0~20, 소수 둘째 자리까지 */
+export async function createProduct(name: string, annualRate: number) {
+  return (await request<DepositProduct>('POST', '/admin/products', { body: { name, annualRate }, auth: true })).data
+}
+
+export async function discontinueProduct(id: number) {
+  return (await request<DepositProduct>('POST', `/admin/products/${id}/discontinuation`, { auth: true })).data
+}
+
+/** 하루치 적수 쌓기(수동). 매일 자동으로 돌고, 같은 날을 다시 실행해도 두 번 쌓이지 않는다 */
+export async function accrueInterest(businessDate: string) {
+  return (await request<AccrualResult>('POST', '/admin/interest/accruals', { body: { businessDate }, auth: true })).data
+}
+
+/** 월 결산(수동). month 는 "2026-11" */
+export async function settleInterest(month: string) {
+  return (await request<SettlementResult>('POST', '/admin/interest/settlements', { body: { month }, auth: true })).data
+}
+
+export async function getInterestPayments(page: number, size = 20, signal?: AbortSignal) {
+  const params = new URLSearchParams({ page: String(page), size: String(size) })
+  return (await request<InterestPaymentPage>('GET', `/admin/interest/payments?${params}`, { auth: true, signal })).data
 }

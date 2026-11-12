@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router'
 import { openAccount } from '../api/corebank'
 import { Chevron } from '../components/icons'
 import { Notice } from '../components/Notice'
+import { ProductSelect } from '../components/ProductSelect'
 import { errorMessage } from '../lib/errors'
 import { parseAccountId } from '../lib/format'
 import { loadRecentAccounts, rememberAccount } from '../lib/recentAccounts'
@@ -13,13 +14,14 @@ export function HomePage() {
   const nameId = useId()
   const lookupInputId = useId()
   const [ownerName, setOwnerName] = useState('')
+  const [productId, setProductId] = useState<number | undefined>(undefined)
   const [lookupId, setLookupId] = useState('')
   const [lookupError, setLookupError] = useState<string | null>(null)
   const recent = loadRecentAccounts()
 
   // 계좌 개설은 돈이 움직이지 않아 서버가 멱등성 키를 요구하지 않는다. 중복 클릭만 버튼 비활성화로 막는다.
   const open = useMutation({
-    mutationFn: (name: string) => openAccount(name),
+    mutationFn: (name: string) => openAccount(name, productId),
     onSuccess: ({ data }) => {
       rememberAccount(data)
       navigate(`/accounts/${data.id}`, { state: { opened: true } })
@@ -71,6 +73,7 @@ export function HomePage() {
                 required
               />
             </div>
+            <ProductSelect value={productId} onChange={setProductId} />
             <button type="submit" className="btn block" disabled={open.isPending || !ownerName.trim()}>
               {open.isPending && <span className="spinner" aria-hidden />}
               {open.isPending ? '개설 중' : '계좌 개설'}

@@ -1,11 +1,37 @@
 import { request } from './client'
-import type { Account, AccountClosure, MyAccounts, Recipient, MoneyTransaction, TransactionHistory, TransferResult } from './types'
+import type {
+  Account,
+  AccountClosure,
+  AccountInterest,
+  DepositProduct,
+  MyAccounts,
+  Recipient,
+  MoneyTransaction,
+  TransactionHistory,
+  TransferResult,
+} from './types'
 
 // 코어뱅킹 API 목록. 화면 코드는 fetch 를 직접 쓰지 않고 이 함수들만 쓴다.
 
-/** 계좌 개설. 관리자는 예금주 이름이 필요하고, 고객은 이름 없이 보내면 본인 명의로 열린다. */
-export function openAccount(ownerName?: string) {
-  return request<Account>('POST', '/accounts', { body: ownerName === undefined ? {} : { ownerName } })
+/**
+ * 계좌 개설. 관리자는 예금주 이름이 필요하고, 고객은 이름 없이 보내면 본인 명의로 열린다.
+ * productId 를 빼면 서버가 기본 상품(기본 입출금 통장)으로 연다.
+ */
+export function openAccount(ownerName?: string, productId?: number) {
+  const body: { ownerName?: string; productId?: number } = {}
+  if (ownerName !== undefined) body.ownerName = ownerName
+  if (productId !== undefined) body.productId = productId
+  return request<Account>('POST', '/accounts', { body })
+}
+
+/** 판매 중인 예금 상품(관리자·고객) */
+export async function getProducts(signal?: AbortSignal) {
+  return (await request<{ content: DepositProduct[] }>('GET', '/products', { signal })).data.content
+}
+
+/** 계좌 이자 현황: 아직 받지 않은 예상 이자, 최근 지급 내역 */
+export async function getAccountInterest(id: number, signal?: AbortSignal) {
+  return (await request<AccountInterest>('GET', `/accounts/${id}/interest`, { signal })).data
 }
 
 /** 내 계좌 목록(고객 토큰 전용). 최신 개설순. */

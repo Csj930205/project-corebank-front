@@ -15,6 +15,8 @@ export interface Account {
   createdAt: string
   /** 해지 시각. 정상 계좌는 null */
   closedAt: string | null
+  /** 예금 상품. annualRate 는 연이율(%) */
+  product: { id: number; name: string; annualRate: number }
 }
 
 /** DepositResponse, WithdrawalResponse */
@@ -59,6 +61,7 @@ export type TransactionType =
   | 'CLOSURE_PAYOUT'
   | 'REVERSAL_OUT'
   | 'REVERSAL_IN'
+  | 'INTEREST'
 
 /** TransactionHistoryResponse.Item */
 export interface HistoryItem {
@@ -211,10 +214,12 @@ export type AuditAction =
   | 'RECIPIENT_LOOKUP'
   | 'ACCOUNT_VIEW'
   | 'TRANSACTION_HISTORY'
+  | 'ACCOUNT_INTEREST'
   | 'DEPOSIT'
   | 'WITHDRAWAL'
   | 'ACCOUNT_CLOSE'
   | 'TRANSFER'
+  | 'PRODUCT_LIST'
   | 'ADMIN_ACCOUNT_SEARCH'
   | 'ADMIN_SUMMARY'
   | 'CLOSING_RUN'
@@ -227,6 +232,12 @@ export type AuditAction =
   | 'CORRECTION_VIEW'
   | 'CORRECTION_APPROVE'
   | 'CORRECTION_REJECT'
+  | 'ADMIN_PRODUCT_LIST'
+  | 'PRODUCT_CREATE'
+  | 'PRODUCT_DISCONTINUE'
+  | 'INTEREST_ACCRUE'
+  | 'INTEREST_SETTLE'
+  | 'INTEREST_PAYMENT_LIST'
   | 'ADMIN_USER_LIST'
   | 'ADMIN_USER_CREATE'
   | 'AUDIT_LOG_SEARCH'
@@ -314,4 +325,75 @@ export interface AdminUser {
   id: number
   username: string
   createdAt: string
+}
+
+// ───────────────────────── 예금 상품·이자 (ProductController, InterestController) ─────────────────────────
+
+/** ProductResponse. annualRate 는 연이율(%), 소수 둘째 자리까지 */
+export interface DepositProduct {
+  id: number
+  name: string
+  annualRate: number
+  status: 'ACTIVE' | 'DISCONTINUED'
+  createdAt: string
+  discontinuedAt: string | null
+}
+
+/** InterestController.Payment. 금액은 원. 세전 = 소득세 + 지방세 + 세후 */
+export interface InterestPayment {
+  id: number
+  accountId: number
+  trigger: 'SETTLEMENT' | 'CLOSURE'
+  periodFrom: string
+  periodTo: string
+  dayCount: number
+  grossAmount: number
+  incomeTax: number
+  localTax: number
+  netAmount: number
+  /** 원장의 이자 거래. 이자가 0원이면 null */
+  transactionId: number | null
+  paidAt: string
+}
+
+/** InterestController.AccountInterestResponse */
+export interface AccountInterest {
+  accountId: number
+  /** 어제까지 쌓였지만 아직 받지 않은 이자. 없으면 null */
+  unpaid: {
+    from: string
+    to: string
+    days: number
+    /** Σ(일별 잔액 × 연이율%). 큰 수라 문자열 */
+    balanceRateSum: string
+    estimatedGross: number
+    estimatedTax: number
+    estimatedNet: number
+  } | null
+  payments: InterestPayment[]
+}
+
+/** InterestService.AccrualResult */
+export interface AccrualResult {
+  businessDate: string
+  accrued: number
+}
+
+/** InterestService.SettlementResult */
+export interface SettlementResult {
+  month: string
+  paid: number
+  skipped: number
+  failed: number
+  totalGross: number
+  totalTax: number
+  totalNet: number
+}
+
+export interface InterestPaymentPage {
+  content: InterestPayment[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
 }

@@ -24,6 +24,11 @@ const MESSAGES: Record<string, string> = {
   CORRECTION_ALREADY_REQUESTED: '이 거래에 승인을 기다리는 정정 요청이 이미 있습니다.',
   CORRECTION_ALREADY_DECIDED: '다른 관리자가 이미 승인 또는 반려했습니다. 목록을 새로 고쳐 주세요.',
   CORRECTION_NOT_FOUND: '정정 요청을 찾을 수 없습니다.',
+  PRODUCT_NOT_FOUND: '상품을 찾을 수 없습니다.',
+  PRODUCT_NOT_AVAILABLE: '판매 중인 상품이 아닙니다. 기본 상품은 판매 중지할 수 없습니다.',
+  PRODUCT_NAME_TAKEN: '같은 이름의 상품이 이미 있습니다.',
+  MONTH_NOT_ENDED: '이번 달과 미래 달은 아직 끝나지 않아 결산할 수 없습니다.',
+  ACCRUAL_ALREADY_RUNNING: '같은 날의 이자 적립이 동시에 실행됐습니다. 잠시 뒤 다시 실행해 주세요.',
   SELF_APPROVAL_NOT_ALLOWED: '본인이 요청한 정정은 다른 관리자가 승인하거나 반려해야 합니다.',
 }
 

@@ -6,6 +6,8 @@ import { getAccount } from '../api/corebank'
 import type { Account } from '../api/types'
 import { ClosureForm } from '../components/ClosureForm'
 import { HistoryList } from '../components/HistoryList'
+import { InterestCard } from '../components/InterestCard'
+import { formatRate } from '../lib/interest'
 import { IdempotencyDemo } from '../components/IdempotencyDemo'
 import { MoneyForm } from '../components/MoneyForm'
 import { Notice } from '../components/Notice'
@@ -61,7 +63,9 @@ function Hero({ account }: { account: Account }) {
     <section className="hero" aria-label="계좌 요약">
       <div className="hero-top">
         <div>
-          <p className="hero-owner">{account.ownerName}님의 입출금 계좌</p>
+          <p className="hero-owner">
+            {account.ownerName}님의 {account.product.name}
+          </p>
           <p className="hero-number">
             {formatAccountNumber(account.accountNumber)}
             <CopyButton text={account.accountNumber} />
@@ -74,7 +78,7 @@ function Hero({ account }: { account: Account }) {
         <strong>{formatWon(account.balance)}</strong>
       </div>
       <p className="hero-meta">
-        계좌 id {account.id} · 개설 {formatDateTime(account.createdAt)}
+        {formatRate(account.product.annualRate)} · 계좌 id {account.id} · 개설 {formatDateTime(account.createdAt)}
         {account.closedAt && ` · 해지 ${formatDateTime(account.closedAt)}`}
       </p>
     </section>
@@ -151,6 +155,7 @@ function AccountView({ id }: { id: number }) {
           {tab === 'close' && <ClosureForm account={data} />}
         </section>
       </div>
+      <InterestCard account={data} />
     </div>
   )
 }

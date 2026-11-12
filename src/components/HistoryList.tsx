@@ -24,6 +24,8 @@ function title(item: HistoryItem): string {
       return `${item.counterparty?.ownerName ?? '알 수 없음'}님이 보냄`
     case 'CLOSURE_PAYOUT':
       return '해지 잔액 지급'
+    case 'INTEREST':
+      return '이자'
     case 'REVERSAL_OUT':
     case 'REVERSAL_IN':
       return `거래 정정 · #${item.reversalOfId} 취소`
