@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { clearSession, getSession, isExpired, saveSession, subscribe } from './session'
+import { clearSession, getSession, isAccessTokenStale, isExpired, saveSession, subscribe } from './session'
 
 const future = () => new Date(Date.now() + 30 * 60_000).toISOString()
 
@@ -45,5 +45,21 @@ describe('session', () => {
     })
     saveSession({ accessToken: 't', username: 'admin', expiresAt: future(), role: 'ADMIN', name: null, adminRole: 'TELLER' })
     expect(getSession()?.accessToken).toBe('t')
+  })
+
+  it('리프레시 토큰 만료가 있으면 액세스 토큰이 만료돼도 로그인은 이어진다', () => {
+    const now = Date.parse('2026-11-13T10:00:00Z')
+    const session = {
+      accessToken: 't',
+      username: 'a',
+      expiresAt: '2026-11-13T09:59:00Z',
+      refreshExpiresAt: '2026-11-13T10:20:00Z',
+      role: 'ADMIN' as const,
+      name: null,
+      adminRole: 'TELLER' as const,
+    }
+    expect(isExpired(session, now)).toBe(false)
+    expect(isAccessTokenStale(session, now)).toBe(true)
+    expect(isExpired(session, Date.parse('2026-11-13T10:20:00Z'))).toBe(true)
   })
 })

@@ -7,6 +7,7 @@ export function saveToken(token: TokenResponse): void {
     accessToken: token.accessToken,
     username: token.username,
     expiresAt: token.expiresAt,
+    refreshExpiresAt: token.refreshExpiresAt,
     role: token.role,
     name: token.name,
     adminRole: token.adminRole ?? null,

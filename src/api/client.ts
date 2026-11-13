@@ -1,5 +1,6 @@
-import { clearSession, getSession } from '../lib/session'
-import type { ErrorBody } from './types'
+import { saveToken } from '../lib/saveToken'
+import { clearSession, getSession, isAccessTokenStale } from '../lib/session'
+import type { ErrorBody, TokenResponse } from './types'
 
 /** 개발 서버 프록시(vite.config.ts)를 거쳐 코어뱅킹 서버로 간다. */
 const BASE_URL = '/api'
@@ -55,7 +56,52 @@ interface RequestOptions {
   auth?: boolean
 }
 
+let refreshing: Promise<boolean> | null = null
+
+/**
+ * 리프레시 토큰(HttpOnly 쿠키)으로 새 액세스 토큰을 받는다. 성공하면 로그인 상태를 새 토큰으로 바꾸고 true.
+ *
+ * 동시에 여러 요청이 만료를 만나도 리프레시는 한 번만 보낸다(같은 Promise 를 나눠 쓴다). 서버는 리프레시 토큰을 쓸 때마다
+ * 바꾸므로(회전), 같은 쿠키로 두 번 보내면 두 번째는 "이미 쓴 토큰" 으로 거부된다.
+ *
+ * 쿠키는 스크립트가 읽지 못한다. 같은 출처 요청이라 브라우저가 알아서 실어 보낸다(fetch 기본 credentials: same-origin).
+ */
+export function refreshSession(): Promise<boolean> {
+  refreshing ??= doRefresh().finally(() => {
+    refreshing = null
+  })
+  return refreshing
+}
+
+async function doRefresh(): Promise<boolean> {
+  let response: Response
+  try {
+    response = await fetch(BASE_URL + '/auth/refresh', { method: 'POST', headers: { Accept: 'application/json' } })
+  } catch {
+    // 서버에 닿지 못했다. 로그인 상태는 그대로 두고, 원래 요청이 실패를 알린다.
+    return false
+  }
+  if (!response.ok) {
+    // 리프레시 토큰이 끝났거나(30분 미사용, 12시간), 로그아웃·도난 탐지로 세션이 끊겼다. 다시 로그인해야 한다.
+    if (response.status === 401) clearSession()
+    return false
+  }
+  saveToken((await response.json()) as TokenResponse)
+  return true
+}
+
 export async function request<T>(method: string, path: string, options: RequestOptions = {}): Promise<ApiResult<T>> {
+  // 액세스 토큰이 이미 만료됐으면 보내 봐야 401 이므로 먼저 리프레시한다.
+  if (options.auth !== false) {
+    const session = getSession()
+    if (session && isAccessTokenStale(session)) {
+      await refreshSession()
+    }
+  }
+  return send<T>(method, path, options, false)
+}
+
+async function send<T>(method: string, path: string, options: RequestOptions, retried: boolean): Promise<ApiResult<T>> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   if (options.body !== undefined) {
     headers['Content-Type'] = 'application/json'
@@ -63,11 +109,9 @@ export async function request<T>(method: string, path: string, options: RequestO
   if (options.idempotencyKey) {
     headers['Idempotency-Key'] = options.idempotencyKey
   }
-  if (options.auth !== false) {
-    const session = getSession()
-    if (session) {
-      headers.Authorization = `Bearer ${session.accessToken}`
-    }
+  const session = options.auth !== false ? getSession() : null
+  if (session) {
+    headers.Authorization = `Bearer ${session.accessToken}`
   }
 
   let response: Response
@@ -86,8 +130,13 @@ export async function request<T>(method: string, path: string, options: RequestO
   }
 
   if (!response.ok) {
-    // 토큰이 만료됐거나 없거나 서버가 거부하면 로그인 상태를 지운다. 화면은 로그인 페이지로 보낸다(RequireAuth).
-    if (options.auth !== false && response.status === 401) {
+    if (session && response.status === 401) {
+      // 토큰이 거부됐다(시계 차이로 만료가 일찍 왔거나, 다른 탭이 리프레시해 이 탭의 토큰이 낡음). 한 번만 리프레시해 다시 보낸다.
+      // 401 은 보안 필터가 업무 처리 전에 막은 것이라, 멱등성 키가 없는 요청(계좌 개설)도 다시 보내도 두 번 처리되지 않는다.
+      if (!retried && (await refreshSession())) {
+        return send<T>(method, path, options, true)
+      }
+      // 리프레시도 안 되면 로그인 상태를 지운다. 화면은 로그인 페이지로 보낸다(RequireAuth).
       clearSession()
     }
     throw new ApiError(response.status, await readErrorBody(response))

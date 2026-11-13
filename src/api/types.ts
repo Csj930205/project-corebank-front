@@ -113,7 +113,12 @@ export interface TokenResponse {
   accessToken: string
   tokenType: 'Bearer'
   expiresIn: number
+  /** 액세스 토큰 만료(15분). 지나면 POST /auth/refresh 로 새로 받는다 */
   expiresAt: string
+  /** 리프레시 토큰 만료(쓰지 않고 30분). 이때까지 요청이 없으면 다시 로그인 */
+  refreshExpiresAt: string
+  /** 로그인 세션의 끝(로그인 뒤 12시간). 계속 써도 이때는 다시 로그인 */
+  sessionExpiresAt: string
   username: string
   role: 'ADMIN' | 'CUSTOMER'
   /** 고객 이름. 관리자는 null */

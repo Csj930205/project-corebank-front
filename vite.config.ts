@@ -13,6 +13,8 @@ export default defineConfig({
         target: process.env.COREBANK_API_URL ?? 'http://localhost:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
+        // 서버는 리프레시 쿠키를 Path=/auth 로 준다. 브라우저 입장의 주소는 /api/auth/... 라서 그대로면 쿠키가 실리지 않는다.
+        cookiePathRewrite: { '/auth': '/api/auth' },
       },
     },
   },
