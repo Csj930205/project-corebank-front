@@ -6,6 +6,10 @@ import type {
   AdminUser,
   AccrualResult,
   DepositProduct,
+  MaturityResult,
+  ProductRate,
+  TimeDepositPage,
+  TimeDepositStatus,
   InterestPaymentPage,
   SettlementResult,
   AdminSummary,
@@ -146,9 +150,39 @@ export async function getAdminProducts(signal?: AbortSignal) {
   return (await request<{ content: DepositProduct[] }>('GET', '/admin/products', { auth: true, signal })).data.content
 }
 
-/** 상품 등록. annualRate 는 연이율(%), 0~20, 소수 둘째 자리까지 */
-export async function createProduct(name: string, annualRate: number) {
-  return (await request<DepositProduct>('POST', '/admin/products', { body: { name, annualRate }, auth: true })).data
+/**
+ * 상품 등록. annualRate 는 연이율(%), 0~20, 소수 둘째 자리까지. 정기예금은 가입 기간(개월, 1~60)이 필수다.
+ * 입출금 상품은 type·termMonths 를 보내지 않는다(서버 기본값 DEMAND).
+ */
+export async function createProduct(name: string, annualRate: number, termMonths?: number) {
+  const body = termMonths === undefined ? { name, annualRate } : { name, type: 'TIME', annualRate, termMonths }
+  return (await request<DepositProduct>('POST', '/admin/products', { body, auth: true })).data
+}
+
+/** 금리 변경. 오늘부터 적용한다. 입출금 계좌는 오늘 마감 잔액부터, 정기예금은 오늘부터 가입하는 예금부터 */
+export async function changeProductRate(id: number, annualRate: number) {
+  return (await request<DepositProduct>('POST', `/admin/products/${id}/rate-changes`, { body: { annualRate }, auth: true }))
+    .data
+}
+
+/** 금리 이력(최신순) */
+export async function getProductRates(id: number, signal?: AbortSignal) {
+  return (await request<{ productId: number; content: ProductRate[] }>('GET', `/admin/products/${id}/rates`, {
+    auth: true,
+    signal,
+  })).data.content
+}
+
+/** 정기예금 목록(최근 가입순). status 가 없으면 전체 */
+export async function getAdminTimeDeposits(status: TimeDepositStatus | null, page: number, size = 20, signal?: AbortSignal) {
+  const params = new URLSearchParams({ page: String(page), size: String(size) })
+  if (status) params.set('status', status)
+  return (await request<TimeDepositPage>('GET', `/admin/time-deposits?${params}`, { auth: true, signal })).data
+}
+
+/** 오늘까지 만기가 된 정기예금 만기 해지(수동). 매일 00:40 에 자동으로 돌고, 다시 실행해도 두 번 지급하지 않는다 */
+export async function runMaturities() {
+  return (await request<MaturityResult>('POST', '/admin/time-deposits/maturities', { auth: true })).data
 }
 
 export async function discontinueProduct(id: number) {

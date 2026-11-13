@@ -36,7 +36,7 @@ export function MyAccountsPage() {
     <>
       <div className="welcome">
         <h1>{session?.name ?? session?.username}님의 계좌</h1>
-        <p>계좌를 눌러 거래내역을 보고 입금·출금·이체를 할 수 있습니다.</p>
+        <p>계좌를 눌러 거래내역을 보고 입금·출금·이체를 할 수 있습니다. 정기예금은 입출금 계좌 화면의 "정기예금" 탭에서 가입합니다.</p>
       </div>
       {welcome && <Notice tone="success" title="가입을 환영합니다. 첫 계좌를 열어 보세요." />}
 
@@ -57,6 +57,7 @@ export function MyAccountsPage() {
                     <span className="recent-text">
                       <span>
                         {formatWon(account.balance)}
+                        {account.product.type === 'TIME' && <span className="pill pill-active">정기예금</span>}
                         {account.status === 'CLOSED' && <span className="pill pill-closed">해지</span>}
                       </span>
                       <span className="mono">

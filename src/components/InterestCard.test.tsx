@@ -13,7 +13,7 @@ const ACCOUNT: Account = {
   status: 'ACTIVE',
   createdAt: '2026-11-03T10:00:00',
   closedAt: null,
-  product: { id: 2, name: '자유적립 예금', annualRate: 3.65 },
+  product: { id: 2, name: '자유적립 예금', type: 'DEMAND', annualRate: 3.65 },
 }
 
 function renderCard(body: AccountInterest) {

@@ -11,6 +11,8 @@ import { formatRate } from '../lib/interest'
 import { IdempotencyDemo } from '../components/IdempotencyDemo'
 import { MoneyForm } from '../components/MoneyForm'
 import { Notice } from '../components/Notice'
+import { TimeDepositOpenForm } from '../components/TimeDepositOpenForm'
+import { TimeDepositPanel } from '../components/TimeDepositPanel'
 import { TransferForm } from '../components/TransferForm'
 import { useSession } from '../hooks/useSession'
 import { errorMessage } from '../lib/errors'
@@ -18,13 +20,14 @@ import { formatAccountNumber, formatDateTime, formatWon, parseAccountId } from '
 import { rememberAccount } from '../lib/recentAccounts'
 import { can, roleOnlyHint } from '../lib/roles'
 
-type Tab = 'deposit' | 'withdraw' | 'transfer' | 'demo' | 'close'
+type Tab = 'deposit' | 'withdraw' | 'transfer' | 'timeDeposit' | 'demo' | 'close'
 
 // 멱등성 시연은 운영 콘솔(관리자) 전용. 고객 화면에는 보이지 않는다.
 const TABS: { id: Tab; label: string; adminOnly?: boolean }[] = [
   { id: 'deposit', label: '입금' },
   { id: 'withdraw', label: '출금' },
   { id: 'transfer', label: '이체' },
+  { id: 'timeDeposit', label: '정기예금' },
   { id: 'demo', label: '멱등성 시연', adminOnly: true },
   { id: 'close', label: '해지' },
 ]
@@ -66,6 +69,7 @@ function Hero({ account }: { account: Account }) {
         <div>
           <p className="hero-owner">
             {account.ownerName}님의 {account.product.name}
+            {account.product.type === 'TIME' && <span className="pill pill-active">정기예금</span>}
           </p>
           <p className="hero-number">
             {formatAccountNumber(account.accountNumber)}
@@ -79,7 +83,7 @@ function Hero({ account }: { account: Account }) {
         <strong>{formatWon(account.balance)}</strong>
       </div>
       <p className="hero-meta">
-        {formatRate(account.product.annualRate)} · 계좌 id {account.id} · 개설 {formatDateTime(account.createdAt)}
+        {account.product.type === 'DEMAND' && `${formatRate(account.product.annualRate)} · `}계좌 id {account.id} · 개설 {formatDateTime(account.createdAt)}
         {account.closedAt && ` · 해지 ${formatDateTime(account.closedAt)}`}
       </p>
     </section>
@@ -120,6 +124,24 @@ function AccountView({ id }: { id: number }) {
   }
 
   const data = account.data
+
+  // 정기예금 계좌는 입금·출금·이체 대신 약정과 중도해지를 보여 준다(서버도 입출금을 거부한다).
+  if (data.product.type === 'TIME') {
+    return (
+      <div className="stack">
+        {justOpened && <Notice tone="success" title="정기예금에 가입했습니다. 만기일에 원금과 이자가 연결계좌로 들어갑니다." />}
+        <Hero account={data} />
+        <TimeDepositPanel accountId={id} canMove={canMove} />
+        <section className="card">
+          <div className="card-title">
+            <h2>거래내역</h2>
+            <p>최신순</p>
+          </div>
+          <HistoryList accountId={id} />
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="stack">
@@ -162,6 +184,7 @@ function AccountView({ id }: { id: number }) {
             {tab === 'deposit' && <MoneyForm accountId={id} kind="deposit" />}
             {tab === 'withdraw' && <MoneyForm accountId={id} kind="withdraw" />}
             {tab === 'transfer' && <TransferForm fromAccountId={id} fromAccountNumber={data.accountNumber} />}
+            {tab === 'timeDeposit' && <TimeDepositOpenForm payoutAccount={data} />}
             {tab === 'demo' && isAdmin && <IdempotencyDemo accountId={id} />}
             {tab === 'close' && <ClosureForm account={data} />}
           </section>

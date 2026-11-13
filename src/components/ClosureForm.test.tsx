@@ -14,7 +14,7 @@ const ACTIVE: Account = {
   status: 'ACTIVE',
   createdAt: '2026-11-03T10:00:00',
   closedAt: null,
-  product: { id: 1, name: '기본 입출금 통장', annualRate: 0.1 },
+  product: { id: 1, name: '기본 입출금 통장', type: 'DEMAND', annualRate: 0.1 },
 }
 
 const CLOSURE = {

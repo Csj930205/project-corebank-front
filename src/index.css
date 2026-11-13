@@ -642,6 +642,37 @@ a:hover {
   color: var(--sub);
 }
 
+/* 표 칸 안의 둘째 줄(작은 회색 글씨) */
+.cell-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--sub);
+}
+
+/* 정기예금: 가입 기간 진행 막대와 소제목 */
+.progress {
+  height: 8px;
+  margin: 0 0 16px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.subhead {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--sub);
+}
+
 /* 버튼 안의 처리 중 표시 */
 .spinner {
   display: inline-block;

@@ -8,6 +8,7 @@ import type {
   Recipient,
   MoneyTransaction,
   TransactionHistory,
+  TimeDeposit,
   TransferResult,
 } from './types'
 
@@ -78,4 +79,22 @@ export async function getHistory(accountId: number, before: number | null, size 
     params.set('before', String(before))
   }
   return (await request<TransactionHistory>('GET', `/accounts/${accountId}/transactions?${params}`, { signal })).data
+}
+
+/**
+ * 정기예금 가입. 연결계좌(payoutAccountId)에서 원금을 꺼내 새 정기예금 계좌에 넣는다. 돈이 움직이므로 멱등성 키가 필수다.
+ * 고객은 본인 입출금 계좌만 연결계좌로 쓸 수 있다(남의 계좌는 404).
+ */
+export function openTimeDeposit(productId: number, principal: number, payoutAccountId: number, idempotencyKey: string) {
+  return request<TimeDeposit>('POST', '/time-deposits', { body: { productId, principal, payoutAccountId }, idempotencyKey })
+}
+
+/** 정기예금 상세: 약정, 만기 예상, 오늘 해지 예상, 해지 결과. 입출금 계좌면 404 */
+export async function getTimeDeposit(accountId: number, signal?: AbortSignal) {
+  return (await request<TimeDeposit>('GET', `/accounts/${accountId}/time-deposit`, { signal })).data
+}
+
+/** 중도해지(만기일 이후면 만기 해지). 원리금은 연결계좌로 간다. 돈이 움직이므로 멱등성 키가 필수다. 성공은 200 */
+export function terminateTimeDeposit(accountId: number, idempotencyKey: string) {
+  return request<TimeDeposit>('POST', `/accounts/${accountId}/time-deposit/termination`, { idempotencyKey })
 }

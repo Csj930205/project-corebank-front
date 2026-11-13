@@ -15,8 +15,11 @@ export interface Account {
   createdAt: string
   /** 해지 시각. 정상 계좌는 null */
   closedAt: string | null
-  /** 예금 상품. annualRate 는 연이율(%) */
-  product: { id: number; name: string; annualRate: number }
+  /**
+   * 예금 상품. annualRate 는 상품의 지금 연이율(%). 정기예금(type TIME)의 약정이율은 GET /accounts/{id}/time-deposit 에 있다
+   * (가입 뒤 상품 금리가 바뀌어도 약정이율은 그대로다).
+   */
+  product: { id: number; name: string; type: ProductType; annualRate: number }
 }
 
 /** DepositResponse, WithdrawalResponse */
@@ -223,7 +226,10 @@ export type AuditAction =
   | 'DEPOSIT'
   | 'WITHDRAWAL'
   | 'ACCOUNT_CLOSE'
+  | 'TIME_DEPOSIT_VIEW'
+  | 'TIME_DEPOSIT_TERMINATE'
   | 'TRANSFER'
+  | 'TIME_DEPOSIT_OPEN'
   | 'PRODUCT_LIST'
   | 'ADMIN_ACCOUNT_SEARCH'
   | 'ADMIN_SUMMARY'
@@ -240,6 +246,10 @@ export type AuditAction =
   | 'ADMIN_PRODUCT_LIST'
   | 'PRODUCT_CREATE'
   | 'PRODUCT_DISCONTINUE'
+  | 'PRODUCT_RATE_CHANGE'
+  | 'PRODUCT_RATE_HISTORY'
+  | 'ADMIN_TIME_DEPOSIT_LIST'
+  | 'TIME_DEPOSIT_MATURITY_RUN'
   | 'INTEREST_ACCRUE'
   | 'INTEREST_SETTLE'
   | 'INTEREST_PAYMENT_LIST'
@@ -345,21 +355,30 @@ export interface AdminUser {
 
 // ───────────────────────── 예금 상품·이자 (ProductController, InterestController) ─────────────────────────
 
-/** ProductResponse. annualRate 는 연이율(%), 소수 둘째 자리까지 */
+/** 상품 종류. DEMAND 입출금 통장(변동 금리, 매일 적수), TIME 정기예금(가입 때 금리 고정, 만기 일시 지급) */
+export type ProductType = 'DEMAND' | 'TIME'
+
+/** ProductResponse. annualRate 는 지금 연이율(%), 소수 둘째 자리까지 */
 export interface DepositProduct {
   id: number
   name: string
+  type: ProductType
   annualRate: number
+  /** 정기예금 가입 기간(개월). 입출금 상품은 null */
+  termMonths: number | null
   status: 'ACTIVE' | 'DISCONTINUED'
   createdAt: string
   discontinuedAt: string | null
 }
 
+/** 이자 지급 계기. 월 결산, 입출금 계좌 해지, 정기예금 만기, 정기예금 중도해지 */
+export type InterestTrigger = 'SETTLEMENT' | 'CLOSURE' | 'MATURITY' | 'EARLY_TERM'
+
 /** InterestController.Payment. 금액은 원. 세전 = 소득세 + 지방세 + 세후 */
 export interface InterestPayment {
   id: number
   accountId: number
-  trigger: 'SETTLEMENT' | 'CLOSURE'
+  trigger: InterestTrigger
   periodFrom: string
   periodTo: string
   dayCount: number
@@ -418,4 +437,84 @@ export interface InterestPaymentPage {
   size: number
   totalElements: number
   totalPages: number
+}
+
+/** ProductController.Rate. 금리 이력 한 줄. effectiveFrom 날짜부터 이 금리 */
+export interface ProductRate {
+  id: number
+  annualRate: number
+  effectiveFrom: string
+  /** 바꾼 관리자. 상품을 만들 때의 첫 금리는 null */
+  changedBy: string | null
+  createdAt: string
+}
+
+// ───────────────────────── 정기예금 (TimeDepositController) ─────────────────────────
+
+export type TimeDepositStatus = 'ACTIVE' | 'MATURED' | 'TERMINATED'
+
+/** TimeDepositResponse.Estimate. 이자 계산 결과. payout = 원금 + 세후 이자 */
+export interface TimeDepositEstimate {
+  trigger: 'MATURITY' | 'EARLY_TERM'
+  appliedRate: number
+  days: number
+  grossInterest: number
+  tax: number
+  netInterest: number
+  payout: number
+}
+
+/** TimeDepositResponse.Settlement. 해지 결과 */
+export interface TimeDepositSettlement {
+  status: TimeDepositStatus
+  appliedRate: number
+  /** 이자 붙은 날이 0일(가입 당일 해지)이면 null */
+  interestPaymentId: number | null
+  grossInterest: number
+  tax: number
+  netInterest: number
+  payout: number
+  payoutTransferId: number
+  settledAt: string
+}
+
+/** TimeDepositResponse. accountId 가 곧 정기예금 번호다(계좌 하나 = 정기예금 하나) */
+export interface TimeDeposit {
+  accountId: number
+  accountNumber: string
+  ownerName: string
+  customerId: number | null
+  balance: number
+  accountStatus: AccountStatus
+  productId: number
+  productName: string
+  status: TimeDepositStatus
+  principal: number
+  /** 약정이율(%). 가입할 때 고정 */
+  annualRate: number
+  termMonths: number
+  startDate: string
+  maturityDate: string
+  /** 연결계좌. 원금을 꺼냈고, 만기·중도해지 때 원리금을 받는다 */
+  payoutAccountId: number
+  atMaturity: TimeDepositEstimate
+  /** 오늘 해지하면. 해지한 예금이면 null */
+  quote: TimeDepositEstimate | null
+  /** 해지 결과. 가입 중이면 null */
+  settlement: TimeDepositSettlement | null
+}
+
+export interface TimeDepositPage {
+  content: TimeDeposit[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+/** TimeDepositService.MaturityResult */
+export interface MaturityResult {
+  businessDate: string
+  matured: number
+  failed: number
 }

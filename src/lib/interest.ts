@@ -22,4 +22,4 @@ export function lastMonth(today: Date = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-export const TRIGGER_LABEL = { SETTLEMENT: '월 결산', CLOSURE: '해지' } as const
+export const TRIGGER_LABEL = { SETTLEMENT: '월 결산', CLOSURE: '해지', MATURITY: '정기예금 만기', EARLY_TERM: '정기예금 중도해지' } as const
